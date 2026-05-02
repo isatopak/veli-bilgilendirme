@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Veli Bilgilendirme Sistemi</title>
+    <style>
+        :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
+        .app-header { background-color: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--text-main); padding: 18px 20px; font-size: 18px; font-weight: 600; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
+        #syncStatus { position: absolute; right: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; }
+        .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        .container { padding: 0 16px 40px 16px; }
+        .screen { display: none; animation: fadeIn 0.3s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .glass-panel { background-color: var(--surface); border-radius: 18px; padding: 24px; margin-bottom: 16px; }
+        .framed-heading { background: var(--surface-variant); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; color: var(--text-main); font-weight: 600; font-size: 16px; }
+        .form-group { margin-bottom: 16px; text-align: left; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); }
+        select, input { width: 100%; padding: 14px 16px; border: none; border-radius: 12px; font-size: 16px; background-color: var(--surface-variant); color: var(--text-main); appearance: none; }
+        select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
+        .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); }
+        .history-card { background: var(--surface-variant); padding: 16px; border-radius: 14px; border-left: 4px solid var(--primary); margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+    <div class="app-header"><span id="headerTitle">Veli Bilgilendirme</span><span id="syncStatus">☁️ Bekleniyor</span></div>
+
+    <div class="container">
+        <!-- KURULUM EKRANI -->
+        <div id="screen-parent-setup" class="screen active">
+            <div class="glass-panel" style="text-align:center; padding: 30px 20px; margin-top:20px;">
+                <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:16px;">
+                    <div style="font-size: 56px;">👨‍👩‍👧</div><div style="font-size: 24px; color: var(--text-muted);">🔗</div><div style="font-size: 56px;">👤</div>
+                </div>
+                <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli - Öğrenci Bağlantısı</h2>
+                <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Lütfen öğrenciyi seçin. Bu cihaz seçilen öğrenciye kilitlenecektir.</p>
+                <div class="form-group"><select id="parentSetupClass" onchange="loadParentSetupStudents()"><option value="" disabled selected>Sınıf Seçiniz...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="6A">6A</option><option value="7E">7E</option></select></div>
+                <div class="form-group"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
+                <div class="form-group" style="margin-top: 24px;"><input type="text" id="parentNameInput" placeholder="Veli Adı Soyadı (Örn: Ayşe Yılmaz)" required></div>
+                <button class="btn-primary" onclick="saveParentSetup()" style="margin-top:24px;">✅ Kaydet ve Bağlan</button>
+            </div>
+        </div>
+
+        <!-- VELİ KARNESİ EKRANI -->
+        <div id="screen-parent-dashboard" class="screen"><div id="parentDashboardContainer"></div></div>
+    </div>
+
+<script>
+    var API_URL = "https://script.google.com/macros/s/AKfycby3yjnkvDiKCzderr29-9Wp74XPnc4xUKcoDxqnWDs4rvOQ65sTb7SjwVWI8bSwsa3cCA/exec";
+
+    let savedHistories = []; let pendingAssignments = []; let pollInterval = null;
+
+    const classData = {
+        "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
+        "5C": ["36 - Ada Temoçin", "88 - Badenur Kaya", "128 - Buğlem Altındaş", "135 - Defne Aktaş", "198 - Gamzenur Yıldız", "224 - Kerem Talha Akyıldız", "246 - Mehmet Timur Yalçın", "262 - Miraç Ege Taşhan", "263 - Miran Durma", "265 - Muhammed Arif Kavaklı", "307 - Solin Rohiv Görür", "344 - Ömer Kayra Mutlu", "355 - Timur Ula", "373 - Seyit Ali Şahin", "413 - Zeynep Cansu Bekdemir", "419 - Azra Geliç", "425 - Berk Emir Arıkan", "438 - Ecrin Ercan", "439 - Edip Yusuf Aydemir", "477 - Mira Su Ürentürk", "487 - Nazlı Ula", "488 - Nehir Armağan Bayır", "492 - Poyraz Ayçetin", "495 - Ramazan İsot", "499 - Semih Şentürk", "501 - Umut Yavaş", "508 - Zeynep Nisa Arancı"],
+        "5D": ["87 - Ayşegül Altunyuva", "116 - Berat Kurubal", "118 - Belinay Sarıbulak", "137 - Derin Mebrule Alper", "187 - Eyüp Arda Karabulut", "222 - Furkan Yakupoğlu", "274 - Resul Güven", "289 - Nazlı Çevik", "291 - Kaan Efe Keten", "360 - Elif Kocaman", "376 - Yusuf Buğra Demirci", "390 - Adanaz Gezer", "414 - Asrın Kurşun", "417 - Ayaz Aksoy", "434 - Devran Çetin", "440 - Ege Özel", "464 - Hümeyra Nas Baloğlu", "466 - Tuana Dundar", "490 - Osman Meral", "493 - Poyraz Karamuk", "498 - Rumeysa Akdemir", "504 - Yağmur Hilal Geçmez", "507 - Zehra Şenses", "541 - Çağrı Karapınar", "543 - Gönül Keleş"],
+        "5E": ["52 - Afşin Kuruca", "142 - Ela Nur Yıldız", "159 - Elif İlhan", "165 - Erva Acar", "169 - Eslimnur Kaya", "170 - Esma Çakal", "175 - Turgut Kaplan", "179 - Hira Elif Kartal", "201 - Hasan Etem Kurubal", "210 - Hira Sena Üzel", "269 - Muhammed Miraç Şirin", "278 - Murat Yıldız", "286 - Nasuh Buğra Yılmaz", "299 - Özgün Ada Erol", "313 - Muhammed Eymen Aslan", "319 - Ömer Sefa Gündüz", "328 - Elif Naz Gedik", "333 - Eda Nil Gedik", "357 - Eylül Çalışkan", "388 - Tuğçe Karakaya", "395 - Muhammet Talha Örün", "408 - Ali Kemal Aydoğdu", "421 - Selim Yıldırım", "448 - Elifnaz Akgül", "449 - Talha Karaca", "469 - Kaan Demir", "489 - Neslihan İşcan", "513 - Taha Tatay"],
+        "6A": ["2 - Ahmet Ayaz Altıntaş", "4 - Ahmet Dere", "5 - Anıl Ergin Aksoy", "11 - Ayaz Nergiz", "14 - Can Karakaya", "17 - Çınar Yüce", "30 - Derin Eren", "35 - Dilara Aydın", "48 - Ela Nur Özbek", "62 - Ezgi Özenses", "63 - Nas Maya Kurubal", "70 - Rüzgar Can", "73 - Saliha Uysal", "84 - Selen Özdemir", "91 - Umut Bozkurt", "93 - Yiğit Er", "94 - Yusuf Hamza Özbek", "96 - Zeynep Balta", "102 - Zeynep Kalender", "105 - İlkim Nehir Tepe", "107 - Ekin Fırat Koç", "109 - Serin Üzel", "125 - Rüzgar İnan Şık", "126 - Nisa Yağmur Ülker", "127 - Eslem Nisa Altındaş", "140 - Ata Can Özdemir", "147 - Sare Karabulut", "238 - Elif Bahar Ceylan", "370 - Solin Deniz Koçin", "389 - Yusuf Uras Kılıç"],
+        "7E": ["34 - Arin Eray Erdoğan", "53 - Mert Ali Balta", "60 - Beyza Gül Kalyon", "69 - Ahmet Ediz Arısoy", "101 - Asenat Aras", "112 - Barış Kazankaya", "161 - Hayrunnisa Toraman", "230 - Muhammed Mahmudov", "247 - Eda Ece Balyemez", "284 - Hafsa Öçal", "340 - Sinem Gül", "341 - Sudenaz Gürsoy", "342 - Sümeyye Kadem Işık", "345 - Tuana Şahin", "348 - Yağız Kaya", "364 - Yusuf Kuzey Özdemir", "365 - Yusuf Özkan Koç", "368 - Tolgahan Paslı", "409 - Efe Mesut Yıldırım", "441 - Dila Taşdemir", "693 - Mustafa Özgür Kütük", "884 - Fadime Eldemir"]
+    };
+
+    window.onload = function() { checkParentStatus(); };
+
+    function checkParentStatus() {
+        let pData = localStorage.getItem('parentStudent');
+        if (pData) { document.getElementById('screen-parent-setup').classList.remove('active'); document.getElementById('screen-parent-dashboard').classList.add('active'); startSync(); } 
+        else { document.getElementById('screen-parent-setup').classList.add('active'); document.getElementById('screen-parent-dashboard').classList.remove('active'); document.getElementById('syncStatus').style.display = 'none'; }
+    }
+
+    function loadParentSetupStudents() {
+        const cls = document.getElementById('parentSetupClass').value; const stuSelect = document.getElementById('parentSetupStudent'); stuSelect.innerHTML = '<option value="" disabled selected>Öğrenci Seçiniz...</option>';
+        if(cls) { classData[cls].forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.text = s; stuSelect.appendChild(opt); }); stuSelect.disabled = false; }
+    }
+    
+    function saveParentSetup() {
+        const cls = document.getElementById('parentSetupClass').value; const stu = document.getElementById('parentSetupStudent').value; const pName = document.getElementById('parentNameInput').value.trim();
+        if(!cls || !stu || !pName) return alert("Eksiksiz doldurun!");
+        if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrenciye kilitlenecektir. Onaylıyor musunuz?")) {
+            localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); document.getElementById('syncStatus').style.display = 'inline-block';
+            registerParentToCloud(cls, stu, pName); checkParentStatus();
+        }
+    }
+
+    function registerParentToCloud(cls, stu, pName) {
+        var form = document.createElement("form"); form.method = "POST"; form.action = API_URL; form.target = "hidden_iframe"; form.style.display = "none";
+        var iA = document.createElement("input"); iA.type = "hidden"; iA.name = "action"; iA.value = "registerParent";
+        var iC = document.createElement("input"); iC.type = "hidden"; iC.name = "className"; iC.value = cls;
+        var iS = document.createElement("input"); iS.type = "hidden"; iS.name = "studentName"; iS.value = stu;
+        var iP = document.createElement("input"); iP.type = "hidden"; iP.name = "parentName"; iP.value = pName;
+        form.appendChild(iA); form.appendChild(iC); form.appendChild(iS); form.appendChild(iP);
+        document.body.appendChild(form); form.submit(); setTimeout(function() { document.body.removeChild(form); }, 1500);
+    }
+
+    function startSync() { document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı Güncel'; loadFromCloud(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); }
+
+    function loadFromCloud() {
+        let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
+        var xhr = new XMLHttpRequest(); let url = API_URL + "?role=parent&className=" + encodeURIComponent(pData.className) + "&studentName=" + encodeURIComponent(pData.studentName);
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                try { var data = JSON.parse(xhr.responseText); if(data.error) return; if(data.history) savedHistories = data.history; if(data.pending) pendingAssignments = data.pending; if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); } catch(e) { }
+            }
+        }; xhr.send();
+    }
+
+    // LİNK ALGILAYICI VE TIKLANABİLİR BUTONA ÇEVİRİCİ
+    function makeClickable(text) {
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, function(url) {
+            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:rgba(10,132,255,0.15); color:var(--primary); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600;">🔗 Tıkla ve Aç</a>`;
+        });
+    }
+
+    function renderParentDashboard() {
+        let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
+        const className = pData.className; const studentName = pData.studentName; const container = document.getElementById('parentDashboardContainer');
+        
+        let html = ''; let total = 0; let doneCount = 0;
+
+        for(let i=0; i<savedHistories.length; i++) {
+            const record = savedHistories[i];
+            if(record.className === className) {
+                let studentDetail = record.details.find(s => s.name === studentName);
+                if (studentDetail) {
+                    if(!record.assignment.includes("EKSİK")) { total++; if (studentDetail.isDone) doneCount++; }
+                    const formattedAssignment = makeClickable(record.assignment);
+                    
+                    if (record.assignment.includes("EKSİK") && !studentDetail.isDone) {
+                        html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${formattedAssignment}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
+                    } else if (!record.assignment.includes("EKSİK")) {
+                        const borderColor = studentDetail.isDone ? 'var(--success)' : 'var(--danger)'; const icon = studentDetail.isDone ? '✅' : '❌';
+                        html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${formattedAssignment}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
+                    }
+                }
+            }
+        }
+
+        let pendingHtml = ''; let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+        sortedPending.forEach(p => {
+            if (p.className === className) {
+                pendingCount++; let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
+                const formattedPending = makeClickable(p.assignment);
+                pendingHtml += `<div class='history-card' style='border-left-color: var(--warning);'><h3 style='color: var(--warning); margin:0;'>⏳ ${formattedPending}</h3><p style='color: var(--text-main); font-weight:500; margin-top:8px;'>Teslim: ${displayDate}</p></div>`;
+            }
+        });
+        let pendingSection = pendingCount > 0 ? `<div class='framed-heading' style='margin-top:24px;'><span>⏳ Yaklaşan Görevler</span></div>${pendingHtml}` : "";
+
+        const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
+
+        if (total === 0 && pendingCount === 0) { 
+            container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
+        } else {
+            const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); 
+            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div><div class='glass-panel' style='text-align: center; margin-bottom: 24px;'><div style='font-size: 48px; font-weight: 700; color: var(--primary); margin-bottom: 4px;'>%${rate}</div><div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div></div>${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
+        }
+    }
+</script>
+</body>
+</html>

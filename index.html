@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#000000">
     <title>Veli Bilgilendirme Sistemi</title>
     <style>
-        :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
+        :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
         .app-header { background-color: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--text-main); padding: 18px 20px; font-size: 18px; font-weight: 600; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
@@ -28,7 +28,6 @@
     </style>
 </head>
 <body>
-
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
     <div class="app-header"><span id="headerTitle">Veli Bilgilendirme</span><span id="syncStatus">☁️ Bekleniyor</span></div>
 
@@ -53,6 +52,7 @@
     </div>
 
 <script>
+    // GITHUB'A YÜKLEMEDEN ÖNCE BURAYA GOOGLE APPS SCRIPT LİNKİNİ YAPIŞTIRMAYI UNUTMA!
     var API_URL = "https://script.google.com/macros/s/AKfycby3yjnkvDiKCzderr29-9Wp74XPnc4xUKcoDxqnWDs4rvOQ65sTb7SjwVWI8bSwsa3cCA/exec";
 
     let savedHistories = []; let pendingAssignments = []; let pollInterval = null;
@@ -81,7 +81,7 @@
     
     function saveParentSetup() {
         const cls = document.getElementById('parentSetupClass').value; const stu = document.getElementById('parentSetupStudent').value; const pName = document.getElementById('parentNameInput').value.trim();
-        if(!cls || !stu || !pName) return alert("Eksiksiz doldurun!");
+        if(!cls || !stu || !pName) return alert("Lütfen tüm alanları doldurun!");
         if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrenciye kilitlenecektir. Onaylıyor musunuz?")) {
             localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); document.getElementById('syncStatus').style.display = 'inline-block';
             registerParentToCloud(cls, stu, pName); checkParentStatus();
@@ -106,12 +106,16 @@
         xhr.open("GET", url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
-                try { var data = JSON.parse(xhr.responseText); if(data.error) return; if(data.history) savedHistories = data.history; if(data.pending) pendingAssignments = data.pending; if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); } catch(e) { }
+                try { 
+                    var data = JSON.parse(xhr.responseText); if(data.error) return; 
+                    if(data.history) savedHistories = data.history; 
+                    if(data.pending) pendingAssignments = data.pending; 
+                    if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); 
+                } catch(e) { }
             }
         }; xhr.send();
     }
 
-    // LİNK ALGILAYICI VE TIKLANABİLİR BUTONA ÇEVİRİCİ
     function makeClickable(text) {
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, function(url) {
@@ -119,23 +123,34 @@
         });
     }
 
+    function getColorForRate(rate) {
+        return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)';
+    }
+
     function renderParentDashboard() {
         let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
         const className = pData.className; const studentName = pData.studentName; const container = document.getElementById('parentDashboardContainer');
         
-        let html = ''; let total = 0; let doneCount = 0;
+        let html = ''; let total = 0; let doneCount = 0; let matIssues = 0;
 
         for(let i=0; i<savedHistories.length; i++) {
             const record = savedHistories[i];
             if(record.className === className) {
                 let studentDetail = record.details.find(s => s.name === studentName);
                 if (studentDetail) {
-                    if(!record.assignment.includes("EKSİK")) { total++; if (studentDetail.isDone) doneCount++; }
+                    let isMaterial = record.assignment.includes("EKSİK") || record.assignment.includes("MATERYAL");
                     const formattedAssignment = makeClickable(record.assignment);
                     
-                    if (record.assignment.includes("EKSİK") && !studentDetail.isDone) {
+                    if(!isMaterial) { 
+                        total++; 
+                        if (studentDetail.isDone) doneCount++; 
+                    } else if (!studentDetail.isDone) {
+                        matIssues++;
+                    }
+                    
+                    if (isMaterial && !studentDetail.isDone) {
                         html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${formattedAssignment}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
-                    } else if (!record.assignment.includes("EKSİK")) {
+                    } else if (!isMaterial) {
                         const borderColor = studentDetail.isDone ? 'var(--success)' : 'var(--danger)'; const icon = studentDetail.isDone ? '✅' : '❌';
                         html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${formattedAssignment}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
                     }
@@ -143,23 +158,54 @@
             }
         }
 
+        const now = new Date();
+        const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
         let pendingHtml = ''; let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
         sortedPending.forEach(p => {
             if (p.className === className) {
                 pendingCount++; let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
                 const formattedPending = makeClickable(p.assignment);
-                pendingHtml += `<div class='history-card' style='border-left-color: var(--warning);'><h3 style='color: var(--warning); margin:0;'>⏳ ${formattedPending}</h3><p style='color: var(--text-main); font-weight:500; margin-top:8px;'>Teslim: ${displayDate}</p></div>`;
+
+                let statusColor = 'var(--info)'; let statusText = 'Yaklaşan Görev'; let icon = '⏳';
+                if (p.dueDate < todayStr) { statusColor = 'var(--danger)'; statusText = 'GÜNÜ GEÇTİ'; icon = '⚠️'; } 
+                else if (p.dueDate === todayStr) { statusColor = 'var(--warning)'; statusText = 'BUGÜN TESLİM'; icon = '🚨'; }
+
+                pendingHtml += `<div class='history-card' style='border-left-color: ${statusColor}; background: rgba(255,255,255,0.02);'>
+                    <div style='display:flex; justify-content:space-between;'>
+                        <span style='font-size:11px; font-weight:bold; color:${statusColor};'>${icon} ${statusText}</span>
+                        <span style='font-size:11px; color:var(--text-muted);'>${displayDate}</span>
+                    </div>
+                    <h3 style='color: var(--text-main); margin:8px 0 0 0; font-size:15px;'>${formattedPending}</h3>
+                </div>`;
             }
         });
-        let pendingSection = pendingCount > 0 ? `<div class='framed-heading' style='margin-top:24px;'><span>⏳ Yaklaşan Görevler</span></div>${pendingHtml}` : "";
-
+        
+        let pendingSection = pendingCount > 0 ? `<div class='framed-heading' style='margin-top:24px;'><span>📌 Ödev Hatırlatıcı</span></div>${pendingHtml}` : "";
         const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
 
-        if (total === 0 && pendingCount === 0) { 
+        if (total === 0 && pendingCount === 0 && matIssues === 0) { 
             container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
         } else {
             const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); 
-            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div><div class='glass-panel' style='text-align: center; margin-bottom: 24px;'><div style='font-size: 48px; font-weight: 700; color: var(--primary); margin-bottom: 4px;'>%${rate}</div><div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div></div>${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
+            const rateColor = getColorForRate(rate);
+
+            let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
+
+            container.innerHTML = `
+                <div style="text-align:center; margin-bottom:24px; padding-top:10px;">
+                    <div style="font-size:56px; margin-bottom:10px;">👤</div>
+                    <h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2>
+                    <p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p>
+                </div>
+                <div class='glass-panel' style='text-align: center; margin-bottom: 24px; border-left: 4px solid ${rateColor};'>
+                    <div style='font-size: 48px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div>
+                    <div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div>
+                </div>
+                ${matWarning}
+                ${pendingSection}
+                <div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>
+                ${html}`;
         }
     }
 </script>

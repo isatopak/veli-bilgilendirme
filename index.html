@@ -9,45 +9,55 @@
         :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
+        
         .app-header { background-color: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--text-main); padding: 18px 20px; font-size: 18px; font-weight: 600; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
         #syncStatus { position: absolute; right: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; }
         .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        
         .container { padding: 0 16px 40px 16px; }
         .screen { display: none; animation: fadeIn 0.3s; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
         .glass-panel { background-color: var(--surface); border-radius: 18px; padding: 24px; margin-bottom: 16px; }
         .framed-heading { background: var(--surface-variant); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; color: var(--text-main); font-weight: 600; font-size: 16px; }
+        
         .form-group { margin-bottom: 16px; text-align: left; }
         .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); }
         select, input { width: 100%; padding: 14px 16px; border: none; border-radius: 12px; font-size: 16px; background-color: var(--surface-variant); color: var(--text-main); appearance: none; }
         select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
         .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); }
+        
+        /* Arşiv Kartları */
         .history-card { background: var(--surface-variant); padding: 16px; border-radius: 14px; border-left: 4px solid var(--primary); margin-bottom: 12px; }
+
+        /* YENİ ÖDEV KUTUCUKLARI (SİMGESEL TASARIM) */
+        .assignment-box { padding: 16px; border-radius: 18px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); display: flex; flex-direction: column;}
+        .box-red { background: linear-gradient(135deg, #FF453A, #FF375F); color: #FFF; }
+        .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
+        .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; justify-content: space-between; align-items: center;}
+        .box-class { font-size: 32px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -1px;}
+        .box-title { font-size: 14px; font-weight: 600; line-height: 1.3; opacity: 0.9; }
     </style>
 </head>
 <body>
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
     <div class="app-header"><span id="headerTitle">Veli Bilgilendirme</span><span id="syncStatus">☁️ Bekleniyor</span></div>
 
     <div class="container">
-        <!-- KURULUM EKRANI -->
         <div id="screen-parent-setup" class="screen active">
             <div class="glass-panel" style="text-align:center; padding: 30px 20px; margin-top:20px;">
                 <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:16px;">
                     <div style="font-size: 56px;">👨‍👩‍👧</div><div style="font-size: 24px; color: var(--text-muted);">🔗</div><div style="font-size: 56px;">👤</div>
                 </div>
-                <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli - Öğrenci Bağlantısı</h2>
-                <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Lütfen öğrenciyi seçin. Bu cihaz seçilen öğrenciye kilitlenecektir.</p>
+                <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli Cihaz Eşleştirme</h2>
+                <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Lütfen öğrenciyi seçin. Bu cihaz seçilen öğrencinin verilerini okumak için kilitlenecektir.</p>
                 <div class="form-group"><select id="parentSetupClass" onchange="loadParentSetupStudents()"><option value="" disabled selected>Sınıf Seçiniz...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="6A">6A</option><option value="7E">7E</option></select></div>
                 <div class="form-group"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
-                <div class="form-group" style="margin-top: 24px;"><input type="text" id="parentNameInput" placeholder="Veli Adı Soyadı (Örn: Ayşe Yılmaz)" required></div>
                 <button class="btn-primary" onclick="saveParentSetup()" style="margin-top:24px;">✅ Kaydet ve Bağlan</button>
             </div>
         </div>
 
-        <!-- VELİ KARNESİ EKRANI -->
         <div id="screen-parent-dashboard" class="screen"><div id="parentDashboardContainer"></div></div>
     </div>
 
@@ -80,22 +90,13 @@
     }
     
     function saveParentSetup() {
-        const cls = document.getElementById('parentSetupClass').value; const stu = document.getElementById('parentSetupStudent').value; const pName = document.getElementById('parentNameInput').value.trim();
-        if(!cls || !stu || !pName) return alert("Lütfen tüm alanları doldurun!");
-        if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrenciye kilitlenecektir. Onaylıyor musunuz?")) {
-            localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); document.getElementById('syncStatus').style.display = 'inline-block';
-            registerParentToCloud(cls, stu, pName); checkParentStatus();
+        const cls = document.getElementById('parentSetupClass').value; const stu = document.getElementById('parentSetupStudent').value;
+        if(!cls || !stu) return alert("Lütfen sınıf ve öğrenci seçin!");
+        if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrencinin verilerini okumak için kilitlenecektir. Onaylıyor musunuz?")) {
+            localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu})); 
+            document.getElementById('syncStatus').style.display = 'inline-block';
+            checkParentStatus();
         }
-    }
-
-    function registerParentToCloud(cls, stu, pName) {
-        var form = document.createElement("form"); form.method = "POST"; form.action = API_URL; form.target = "hidden_iframe"; form.style.display = "none";
-        var iA = document.createElement("input"); iA.type = "hidden"; iA.name = "action"; iA.value = "registerParent";
-        var iC = document.createElement("input"); iC.type = "hidden"; iC.name = "className"; iC.value = cls;
-        var iS = document.createElement("input"); iS.type = "hidden"; iS.name = "studentName"; iS.value = stu;
-        var iP = document.createElement("input"); iP.type = "hidden"; iP.name = "parentName"; iP.value = pName;
-        form.appendChild(iA); form.appendChild(iC); form.appendChild(iS); form.appendChild(iP);
-        document.body.appendChild(form); form.submit(); setTimeout(function() { document.body.removeChild(form); }, 1500);
     }
 
     function startSync() { document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı Güncel'; loadFromCloud(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); }
@@ -108,8 +109,8 @@
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try { 
                     var data = JSON.parse(xhr.responseText); if(data.error) return; 
-                    if(data.history) savedHistories = data.history; 
-                    if(data.pending) pendingAssignments = data.pending; 
+                    savedHistories = data.history || []; 
+                    pendingAssignments = data.pending || []; 
                     if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); 
                 } catch(e) { }
             }
@@ -119,13 +120,11 @@
     function makeClickable(text) {
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, function(url) {
-            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:rgba(10,132,255,0.15); color:var(--primary); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600;">🔗 Tıkla ve Aç</a>`;
+            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:rgba(0,0,0,0.15); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600; color: inherit;">🔗 Tıkla ve Aç</a>`;
         });
     }
 
-    function getColorForRate(rate) {
-        return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)';
-    }
+    function getColorForRate(rate) { return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)'; }
 
     function renderParentDashboard() {
         let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
@@ -138,8 +137,9 @@
             if(record.className === className) {
                 let studentDetail = record.details.find(s => s.name === studentName);
                 if (studentDetail) {
-                    let isMaterial = record.assignment.includes("EKSİK") || record.assignment.includes("MATERYAL");
-                    const formattedAssignment = makeClickable(record.assignment);
+                    let asg = record.assignment || "";
+                    let isMaterial = asg.includes("EKSİK") || asg.includes("MATERYAL");
+                    const formattedAssignment = makeClickable(asg);
                     
                     if(!isMaterial) { 
                         total++; 
@@ -158,28 +158,28 @@
             }
         }
 
-        const now = new Date();
-        const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-
-        let pendingHtml = ''; let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+        const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        
+        let pendingHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">';
+        let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+        
         sortedPending.forEach(p => {
             if (p.className === className) {
-                pendingCount++; let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                const formattedPending = makeClickable(p.assignment);
+                pendingCount++;
+                let isTodayOrPast = p.dueDate <= todayStr;
+                let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
+                let icon = isTodayOrPast ? '🚨' : '⏳';
+                let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
+                const formattedPending = makeClickable(p.assignment || "");
 
-                let statusColor = 'var(--info)'; let statusText = 'Yaklaşan Görev'; let icon = '⏳';
-                if (p.dueDate < todayStr) { statusColor = 'var(--danger)'; statusText = 'GÜNÜ GEÇTİ'; icon = '⚠️'; } 
-                else if (p.dueDate === todayStr) { statusColor = 'var(--warning)'; statusText = 'BUGÜN TESLİM'; icon = '🚨'; }
-
-                pendingHtml += `<div class='history-card' style='border-left-color: ${statusColor}; background: rgba(255,255,255,0.02);'>
-                    <div style='display:flex; justify-content:space-between;'>
-                        <span style='font-size:11px; font-weight:bold; color:${statusColor};'>${icon} ${statusText}</span>
-                        <span style='font-size:11px; color:var(--text-muted);'>${displayDate}</span>
-                    </div>
-                    <h3 style='color: var(--text-main); margin:8px 0 0 0; font-size:15px;'>${formattedPending}</h3>
+                pendingHtml += `<div class="assignment-box ${boxClass}">
+                    <div class="box-date"><span>${icon} ${displayDate}</span></div>
+                    <div class="box-class">${p.className}</div>
+                    <div class="box-title">${formattedPending}</div>
                 </div>`;
             }
         });
+        pendingHtml += '</div>';
         
         let pendingSection = pendingCount > 0 ? `<div class='framed-heading' style='margin-top:24px;'><span>📌 Ödev Hatırlatıcı</span></div>${pendingHtml}` : "";
         const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
@@ -187,25 +187,9 @@
         if (total === 0 && pendingCount === 0 && matIssues === 0) { 
             container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
         } else {
-            const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); 
-            const rateColor = getColorForRate(rate);
-
+            const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); const rateColor = getColorForRate(rate);
             let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
-
-            container.innerHTML = `
-                <div style="text-align:center; margin-bottom:24px; padding-top:10px;">
-                    <div style="font-size:56px; margin-bottom:10px;">👤</div>
-                    <h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2>
-                    <p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p>
-                </div>
-                <div class='glass-panel' style='text-align: center; margin-bottom: 24px; border-left: 4px solid ${rateColor};'>
-                    <div style='font-size: 48px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div>
-                    <div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div>
-                </div>
-                ${matWarning}
-                ${pendingSection}
-                <div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>
-                ${html}`;
+            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div><div class='glass-panel' style='text-align: center; margin-bottom: 24px; border-left: 4px solid ${rateColor};'><div style='font-size: 48px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div><div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div></div>${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
         }
     }
 </script>

@@ -52,7 +52,18 @@
                 </div>
                 <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli Cihaz Eşleştirme</h2>
                 <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Lütfen öğrenciyi seçin. Bu cihaz seçilen öğrencinin verilerini okumak için kilitlenecektir.</p>
-                <div class="form-group"><select id="parentSetupClass" onchange="loadParentSetupStudents()"><option value="" disabled selected>Sınıf Seçiniz...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="6A">6A</option><option value="7E">7E</option></select></div>
+                <div class="form-group">
+                    <select id="parentSetupClass" onchange="loadParentSetupStudents()">
+                        <option value="" disabled selected>Sınıf Seçiniz...</option>
+                        <option value="5B">5B</option>
+                        <option value="5C">5C</option>
+                        <option value="5D">5D</option>
+                        <option value="5E">5E</option>
+                        <option value="5YDA">5YDA</option>
+                        <option value="6A">6A</option>
+                        <option value="7E">7E</option>
+                    </select>
+                </div>
                 <div class="form-group"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
                 <button class="btn-primary" onclick="saveParentSetup()" style="margin-top:24px;">✅ Kaydet ve Bağlan</button>
             </div>
@@ -62,7 +73,6 @@
     </div>
 
 <script>
-    // GITHUB'A YÜKLEMEDEN ÖNCE BURAYA GOOGLE APPS SCRIPT LİNKİNİ YAPIŞTIRMAYI UNUTMA!
     var API_URL = "https://script.google.com/macros/s/AKfycby3yjnkvDiKCzderr29-9Wp74XPnc4xUKcoDxqnWDs4rvOQ65sTb7SjwVWI8bSwsa3cCA/exec";
 
     let savedHistories = []; let pendingAssignments = []; let pollInterval = null;
@@ -72,6 +82,7 @@
         "5C": ["36 - Ada Temoçin", "88 - Badenur Kaya", "128 - Buğlem Altındaş", "135 - Defne Aktaş", "198 - Gamzenur Yıldız", "224 - Kerem Talha Akyıldız", "246 - Mehmet Timur Yalçın", "262 - Miraç Ege Taşhan", "263 - Miran Durma", "265 - Muhammed Arif Kavaklı", "307 - Solin Rohiv Görür", "344 - Ömer Kayra Mutlu", "355 - Timur Ula", "373 - Seyit Ali Şahin", "413 - Zeynep Cansu Bekdemir", "419 - Azra Geliç", "425 - Berk Emir Arıkan", "438 - Ecrin Ercan", "439 - Edip Yusuf Aydemir", "477 - Mira Su Ürentürk", "487 - Nazlı Ula", "488 - Nehir Armağan Bayır", "492 - Poyraz Ayçetin", "495 - Ramazan İsot", "499 - Semih Şentürk", "501 - Umut Yavaş", "508 - Zeynep Nisa Arancı"],
         "5D": ["87 - Ayşegül Altunyuva", "116 - Berat Kurubal", "118 - Belinay Sarıbulak", "137 - Derin Mebrule Alper", "187 - Eyüp Arda Karabulut", "222 - Furkan Yakupoğlu", "274 - Resul Güven", "289 - Nazlı Çevik", "291 - Kaan Efe Keten", "360 - Elif Kocaman", "376 - Yusuf Buğra Demirci", "390 - Adanaz Gezer", "414 - Asrın Kurşun", "417 - Ayaz Aksoy", "434 - Devran Çetin", "440 - Ege Özel", "464 - Hümeyra Nas Baloğlu", "466 - Tuana Dundar", "490 - Osman Meral", "493 - Poyraz Karamuk", "498 - Rumeysa Akdemir", "504 - Yağmur Hilal Geçmez", "507 - Zehra Şenses", "541 - Çağrı Karapınar", "543 - Gönül Keleş"],
         "5E": ["52 - Afşin Kuruca", "142 - Ela Nur Yıldız", "159 - Elif İlhan", "165 - Erva Acar", "169 - Eslimnur Kaya", "170 - Esma Çakal", "175 - Turgut Kaplan", "179 - Hira Elif Kartal", "201 - Hasan Etem Kurubal", "210 - Hira Sena Üzel", "269 - Muhammed Miraç Şirin", "278 - Murat Yıldız", "286 - Nasuh Buğra Yılmaz", "299 - Özgün Ada Erol", "313 - Muhammed Eymen Aslan", "319 - Ömer Sefa Gündüz", "328 - Elif Naz Gedik", "333 - Eda Nil Gedik", "357 - Eylül Çalışkan", "388 - Tuğçe Karakaya", "395 - Muhammet Talha Örün", "408 - Ali Kemal Aydoğdu", "421 - Selim Yıldırım", "448 - Elifnaz Akgül", "449 - Talha Karaca", "469 - Kaan Demir", "489 - Neslihan İşcan", "513 - Taha Tatay"],
+        "5YDA": ["124 - Berkay Karagöz", "189 - Çınar Ali Demir", "209 - Sevgi Şener", "433 - Derin Somer", "451 - Emir Diler", "216 - Hüseyin Metin Ünlü", "292 - Ömer Toprak Kurubal", "363 - Hüseyin Kayra Demir", "415 - Asya Gökmen", "428 - Buğra Çınar", "475 - Melinay Perçin", "246 - Mehmet Timur Yalçın", "373 - Seyit Ali Şahin", "499 - Semih Şentürk", "501 - Umut Yavaş", "116 - Berat Kurubal", "414 - Asrın Kurşun", "440 - Ege Özel", "466 - Tuana Dündar", "170 - Esma Çakal", "408 - Ali Kemal Aydoğdu", "59 - Ahsen Ece Özbek", "75 - Almira Aydın", "111 - Bengü Kılıç", "153 - Elif İkra Bektaş", "202 - Hilal Erva Kurubal", "312 - Efecan Halitoğulları", "410 - Zehra Karabulut", "422 - Beren Dere", "494 - Poyraz Kartal"],
         "6A": ["2 - Ahmet Ayaz Altıntaş", "4 - Ahmet Dere", "5 - Anıl Ergin Aksoy", "11 - Ayaz Nergiz", "14 - Can Karakaya", "17 - Çınar Yüce", "30 - Derin Eren", "35 - Dilara Aydın", "48 - Ela Nur Özbek", "62 - Ezgi Özenses", "63 - Nas Maya Kurubal", "70 - Rüzgar Can", "73 - Saliha Uysal", "84 - Selen Özdemir", "91 - Umut Bozkurt", "93 - Yiğit Er", "94 - Yusuf Hamza Özbek", "96 - Zeynep Balta", "102 - Zeynep Kalender", "105 - İlkim Nehir Tepe", "107 - Ekin Fırat Koç", "109 - Serin Üzel", "125 - Rüzgar İnan Şık", "126 - Nisa Yağmur Ülker", "127 - Eslem Nisa Altındaş", "140 - Ata Can Özdemir", "147 - Sare Karabulut", "238 - Elif Bahar Ceylan", "370 - Solin Deniz Koçin", "389 - Yusuf Uras Kılıç"],
         "7E": ["34 - Arin Eray Erdoğan", "53 - Mert Ali Balta", "60 - Beyza Gül Kalyon", "69 - Ahmet Ediz Arısoy", "101 - Asenat Aras", "112 - Barış Kazankaya", "161 - Hayrunnisa Toraman", "230 - Muhammed Mahmudov", "247 - Eda Ece Balyemez", "284 - Hafsa Öçal", "340 - Sinem Gül", "341 - Sudenaz Gürsoy", "342 - Sümeyye Kadem Işık", "345 - Tuana Şahin", "348 - Yağız Kaya", "364 - Yusuf Kuzey Özdemir", "365 - Yusuf Özkan Koç", "368 - Tolgahan Paslı", "409 - Efe Mesut Yıldırım", "441 - Dila Taşdemir", "693 - Mustafa Özgür Kütük", "884 - Fadime Eldemir"]
     };

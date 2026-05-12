@@ -66,6 +66,7 @@
 
 <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbx0kLfHi4lRRzytOR_D3Dz5O3_cWsqs7KAkZq7LZvnYh7VaOhGouCWHlUD5Zw7_w07nEQ/exec";
+
     let savedHistories = []; let pendingAssignments = []; let pollInterval = null;
 
     const classData = {
@@ -104,7 +105,8 @@
     function startSync() { document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı Güncel'; loadFromCloud(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); }
 
     function loadFromCloud() {
-        var xhr = new XMLHttpRequest(); xhr.open("GET", API_URL + "?role=parent", true);
+        var xhr = new XMLHttpRequest(); 
+        xhr.open("GET", API_URL + "?role=parent", true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try { 
@@ -113,7 +115,7 @@
                     savedHistories = data.history || []; 
                     pendingAssignments = data.pending || []; 
                     if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); 
-                } catch(e) { console.error(e); }
+                } catch(e) { console.error("Veri okuma hatası", e); }
             }
         }; xhr.send();
     }
@@ -169,7 +171,7 @@
                 let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
                 let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                const formattedPending = makeClickable(p.assignment || "");
+                const formattedPending = makeClickable(p.assignment);
 
                 pendingHtml += `<div class="assignment-box ${boxClass}">
                     <div class="box-date"><span>${icon} ${displayDate}</span></div>

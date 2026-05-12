@@ -110,12 +110,17 @@
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try { 
-                    var data = JSON.parse(xhr.responseText); 
+                    let resText = xhr.responseText.trim();
+                    if(!resText) return;
+
+                    var data;
+                    if(resText.startsWith('{')) { data = JSON.parse(resText); } 
+                    else { data = JSON.parse(decodeURIComponent(escape(atob(resText.replace(/-/g, '+').replace(/_/g, '/'))))); }
+                    
                     if(data.error) return; 
-                    savedHistories = data.history || []; 
-                    pendingAssignments = data.pending || []; 
+                    savedHistories = data.history || []; pendingAssignments = data.pending || []; 
                     if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); 
-                } catch(e) { console.error("Veri okuma hatası", e); }
+                } catch(e) {}
             }
         }; xhr.send();
     }
@@ -171,7 +176,7 @@
                 let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
                 let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                const formattedPending = makeClickable(p.assignment);
+                const formattedPending = makeClickable(p.assignment || "");
 
                 pendingHtml += `<div class="assignment-box ${boxClass}">
                     <div class="box-date"><span>${icon} ${displayDate}</span></div>

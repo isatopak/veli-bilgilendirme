@@ -73,7 +73,7 @@
     </div>
 
 <script>
-    var API_URL = "https://script.google.com/macros/s/AKfycby3yjnkvDiKCzderr29-9Wp74XPnc4xUKcoDxqnWDs4rvOQ65sTb7SjwVWI8bSwsa3cCA/exec";
+    var API_URL = "https://script.google.com/macros/s/AKfycbx0kLfHi4lRRzytOR_D3Dz5O3_cWsqs7KAkZq7LZvnYh7VaOhGouCWHlUD5Zw7_w07nEQ/exec";
 
     let savedHistories = []; let pendingAssignments = []; let pollInterval = null;
 
@@ -119,7 +119,10 @@
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try { 
-                    var data = JSON.parse(xhr.responseText); if(data.error) return; 
+                    // ÖNEMLİ DEĞİŞİKLİK: Öğretmen panelinden zırhlanarak gelen linkleri okuyabilmek için decode ekledik
+                    var decodedData = decodeURIComponent(xhr.responseText);
+                    var data = JSON.parse(decodedData); 
+                    if(data.error) return; 
                     savedHistories = data.history || []; 
                     pendingAssignments = data.pending || []; 
                     if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); 

@@ -104,7 +104,6 @@
 
     function startSync() { document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı Güncel'; loadFromCloud(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); }
 
-    // ORİJİNAL, STABİL OKUMA FONKSİYONU
     function loadFromCloud() {
         let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
         var xhr = new XMLHttpRequest(); let url = API_URL + "?role=parent&className=" + encodeURIComponent(pData.className) + "&studentName=" + encodeURIComponent(pData.studentName);
@@ -122,14 +121,6 @@
         }; xhr.send();
     }
 
-    function makeClickable(text) {
-        if (!text) return "";
-        var urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.replace(urlRegex, function(url) {
-            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:rgba(0,0,0,0.15); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600; color: inherit;">🔗 Tıkla ve Aç</a>`;
-        });
-    }
-
     function getColorForRate(rate) { return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)'; }
 
     function renderParentDashboard() {
@@ -145,24 +136,26 @@
                 if (studentDetail) {
                     let asg = record.assignment || "";
                     let isMaterial = asg.includes("EKSİK") || asg.includes("MATERYAL");
-                    const formattedAssignment = makeClickable(asg);
                     
                     if(!isMaterial) { 
                         total++; 
                         if (studentDetail.isDone) doneCount++; 
-                    } else if (!studentDetail.isDone) { matIssues++; }
+                    } else if (!studentDetail.isDone) {
+                        matIssues++;
+                    }
                     
                     if (isMaterial && !studentDetail.isDone) {
-                        html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${formattedAssignment}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
+                        html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${asg}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
                     } else if (!isMaterial) {
                         const borderColor = studentDetail.isDone ? 'var(--success)' : 'var(--danger)'; const icon = studentDetail.isDone ? '✅' : '❌';
-                        html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${formattedAssignment}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
+                        html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${asg}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
                     }
                 }
             }
         }
 
         const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        
         let pendingHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">';
         let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
         
@@ -173,12 +166,11 @@
                 let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
                 let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                const formattedPending = makeClickable(p.assignment);
 
                 pendingHtml += `<div class="assignment-box ${boxClass}">
                     <div class="box-date"><span>${icon} ${displayDate}</span></div>
                     <div class="box-class">${p.className}</div>
-                    <div class="box-title">${formattedPending}</div>
+                    <div class="box-title">${p.assignment}</div>
                 </div>`;
             }
         });

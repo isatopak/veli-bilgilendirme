@@ -104,23 +104,20 @@
 
     function startSync() { document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı Güncel'; loadFromCloud(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); }
 
+    // ORİJİNAL, STABİL OKUMA FONKSİYONU
     function loadFromCloud() {
-        var xhr = new XMLHttpRequest(); 
-        xhr.open("GET", API_URL + "?role=parent", true);
+        let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
+        var xhr = new XMLHttpRequest(); let url = API_URL + "?role=parent&className=" + encodeURIComponent(pData.className) + "&studentName=" + encodeURIComponent(pData.studentName);
+        xhr.open("GET", url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try { 
-                    let resText = xhr.responseText.trim();
-                    if(!resText) return;
-
-                    var data;
-                    if(resText.startsWith('{')) { data = JSON.parse(resText); } 
-                    else { data = JSON.parse(decodeURIComponent(escape(atob(resText.replace(/-/g, '+').replace(/_/g, '/'))))); }
-                    
+                    var data = JSON.parse(xhr.responseText); 
                     if(data.error) return; 
-                    savedHistories = data.history || []; pendingAssignments = data.pending || []; 
+                    savedHistories = data.history || []; 
+                    pendingAssignments = data.pending || []; 
                     if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); 
-                } catch(e) {}
+                } catch(e) { }
             }
         }; xhr.send();
     }
@@ -129,7 +126,7 @@
         if (!text) return "";
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, function(url) {
-            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:var(--primary); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600; color: #FFF;">🔗 Tıkla ve Aç</a>`;
+            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:rgba(0,0,0,0.15); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600; color: inherit;">🔗 Tıkla ve Aç</a>`;
         });
     }
 
@@ -176,7 +173,7 @@
                 let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
                 let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                const formattedPending = makeClickable(p.assignment || "");
+                const formattedPending = makeClickable(p.assignment);
 
                 pendingHtml += `<div class="assignment-box ${boxClass}">
                     <div class="box-date"><span>${icon} ${displayDate}</span></div>

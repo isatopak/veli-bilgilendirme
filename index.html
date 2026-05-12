@@ -110,6 +110,7 @@
 
     function startSync() { document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı Güncel'; loadFromCloud(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); }
 
+    // BASE64 ÇÖZÜCÜ
     function loadFromCloud() {
         let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
         var xhr = new XMLHttpRequest(); let url = API_URL + "?role=parent&className=" + encodeURIComponent(pData.className) + "&studentName=" + encodeURIComponent(pData.studentName);
@@ -118,8 +119,11 @@
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try { 
                     let resText = xhr.responseText;
-                    if(resText.startsWith('%7B')) resText = decodeURIComponent(resText);
-                    var data = JSON.parse(resText); 
+                    var data;
+                    
+                    if(resText.startsWith('%7B')) data = JSON.parse(decodeURIComponent(resText)); 
+                    else if(resText.startsWith('{')) data = JSON.parse(resText);
+                    else data = JSON.parse(decodeURIComponent(escape(atob(resText)))); // Tam Güvenli Çözücü
                     
                     if(data.error) return; 
                     savedHistories = data.history || []; 

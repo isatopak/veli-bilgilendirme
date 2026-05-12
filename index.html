@@ -53,13 +53,7 @@
                 <div class="form-group">
                     <select id="parentSetupClass" onchange="loadParentSetupStudents()">
                         <option value="" disabled selected>Sınıf Seçiniz...</option>
-                        <option value="5B">5B</option>
-                        <option value="5C">5C</option>
-                        <option value="5D">5D</option>
-                        <option value="5E">5E</option>
-                        <option value="5YDA">5YDA</option>
-                        <option value="6A">6A</option>
-                        <option value="7E">7E</option>
+                        <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option>
                     </select>
                 </div>
                 <div class="form-group"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
@@ -72,7 +66,6 @@
 
 <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbx0kLfHi4lRRzytOR_D3Dz5O3_cWsqs7KAkZq7LZvnYh7VaOhGouCWHlUD5Zw7_w07nEQ/exec";
-
     let savedHistories = []; let pendingAssignments = []; let pollInterval = null;
 
     const classData = {
@@ -110,21 +103,12 @@
 
     function startSync() { document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı Güncel'; loadFromCloud(); if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); }
 
-    // BASE64 ÇÖZÜCÜ
     function loadFromCloud() {
-        let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
-        var xhr = new XMLHttpRequest(); let url = API_URL + "?role=parent&className=" + encodeURIComponent(pData.className) + "&studentName=" + encodeURIComponent(pData.studentName);
-        xhr.open("GET", url, true);
+        var xhr = new XMLHttpRequest(); xhr.open("GET", API_URL + "?role=parent", true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try { 
-                    let resText = xhr.responseText;
-                    var data;
-                    
-                    if(resText.startsWith('%7B')) data = JSON.parse(decodeURIComponent(resText)); 
-                    else if(resText.startsWith('{')) data = JSON.parse(resText);
-                    else data = JSON.parse(decodeURIComponent(escape(atob(resText)))); // Tam Güvenli Çözücü
-                    
+                    var data = JSON.parse(xhr.responseText); 
                     if(data.error) return; 
                     savedHistories = data.history || []; 
                     pendingAssignments = data.pending || []; 
@@ -135,9 +119,10 @@
     }
 
     function makeClickable(text) {
+        if (!text) return "";
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return text.replace(urlRegex, function(url) {
-            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:rgba(0,0,0,0.15); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600; color: inherit;">🔗 Tıkla ve Aç</a>`;
+            return `<br><a href="${url}" target="_blank" style="display:inline-block; margin-top:8px; background:var(--primary); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:13px; font-weight:600; color: #FFF;">🔗 Tıkla ve Aç</a>`;
         });
     }
 
@@ -161,9 +146,7 @@
                     if(!isMaterial) { 
                         total++; 
                         if (studentDetail.isDone) doneCount++; 
-                    } else if (!studentDetail.isDone) {
-                        matIssues++;
-                    }
+                    } else if (!studentDetail.isDone) { matIssues++; }
                     
                     if (isMaterial && !studentDetail.isDone) {
                         html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${formattedAssignment}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
@@ -176,7 +159,6 @@
         }
 
         const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-        
         let pendingHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">';
         let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
         

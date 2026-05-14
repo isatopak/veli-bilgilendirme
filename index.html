@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
     <title>Veli Bilgilendirme Sistemi</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -86,12 +90,23 @@
         <div id="screen-parent-dashboard" class="screen"><div id="parentDashboardContainer"></div></div>
     </div>
 
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
 <script>
-    var API_URL = "https://script.google.com/macros/s/AKfycby3yjnkvDiKCzderr29-9Wp74XPnc4xUKcoDxqnWDs4rvOQ65sTb7SjwVWI8bSwsa3cCA/exec";
+    // --- FIREBASE BAĞLANTISI (YENİ MOTOR) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc",
+      authDomain: "odevtakipsistemi-b9fff.firebaseapp.com",
+      databaseURL: "https://odevtakipsistemi-b9fff-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "odevtakipsistemi-b9fff",
+      storageBucket: "odevtakipsistemi-b9fff.firebasestorage.app",
+      messagingSenderId: "354499388490",
+      appId: "1:354499388490:web:b2a53dba1dc8d5c20732b3"
+    };
 
-    let savedHistories = []; let pendingAssignments = []; let pollInterval = null;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const dbRef = db.ref('odevData');
+
+    let savedHistories = []; let pendingAssignments = [];
 
     const classData = {
         "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
@@ -145,49 +160,47 @@
             
             document.getElementById('loadingOverlay').style.display = 'flex';
             
-            var form = document.createElement("form"); form.method = "POST"; form.action = API_URL; form.target = "hidden_iframe"; form.style.display = "none";
-            
-            var inputAction = document.createElement("input"); inputAction.type = "hidden"; inputAction.name = "action"; inputAction.value = "registerParent";
-            var inputClass = document.createElement("input"); inputClass.type = "hidden"; inputClass.name = "className"; inputClass.value = cls;
-            var inputStudent = document.createElement("input"); inputStudent.type = "hidden"; inputStudent.name = "studentName"; inputStudent.value = stu;
-            var inputParent = document.createElement("input"); inputParent.type = "hidden"; inputParent.name = "parentName"; inputParent.value = pName;
-            
-            form.appendChild(inputAction); form.appendChild(inputClass); form.appendChild(inputStudent); form.appendChild(inputParent);
-            document.body.appendChild(form); 
-            form.submit();
+            // Firebase'e Doğrudan Veli Kaydı
+            db.ref('odevData/parentConnections').once('value').then((snapshot) => {
+                let connections = snapshot.val() || [];
+                let exists = connections.find(c => c.className === cls && c.studentName === stu && c.parentName === pName);
+                
+                if (!exists) {
+                    connections.push({className: cls, studentName: stu, parentName: pName, date: new Date().toLocaleDateString('tr-TR')});
+                    db.ref('odevData/parentConnections').set(connections);
+                }
 
-            // BEKLEME SÜRESİ 5 SANİYEYE ÇIKARILDI (5000ms)
-            setTimeout(function() { 
-                document.body.removeChild(form);
+                // 5 saniye beklemeye gerek yok, Firebase çok hızlı! 1.5 saniye animasyon için yeterli.
+                setTimeout(function() { 
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
+                    checkParentStatus();
+                }, 1500);
+                
+            }).catch(err => {
+                alert("Bağlantı hatası! Lütfen internetinizi kontrol edin.");
                 document.getElementById('loadingOverlay').style.display = 'none';
-                localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
-                checkParentStatus();
-            }, 5000);
+            });
         }
     }
 
+    // --- YENİ NESİL GERÇEK ZAMANLI DİNLEME ---
     function startSync() { 
         document.getElementById('syncStatus').style.display = 'inline-block';
         document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı'; 
-        loadFromCloud(); 
-        if (pollInterval) clearInterval(pollInterval); pollInterval = setInterval(loadFromCloud, 2000); 
-    }
-
-    function loadFromCloud() {
-        let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
-        var xhr = new XMLHttpRequest(); let url = API_URL + "?role=parent&className=" + encodeURIComponent(pData.className) + "&studentName=" + encodeURIComponent(pData.studentName);
-        xhr.open("GET", url, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                try { 
-                    var data = JSON.parse(xhr.responseText); 
-                    if(data.error) return; 
-                    savedHistories = data.history || []; 
-                    pendingAssignments = data.pending || []; 
-                    if (document.getElementById('screen-parent-dashboard').classList.contains('active')) renderParentDashboard(); 
-                } catch(e) { }
+        
+        // Polling (setInterval) ve XMLHttpRequest tamamen silindi!
+        // Firebase veritabanında bir değişiklik olduğu an otomatik tetiklenir.
+        dbRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                var data = snapshot.val();
+                savedHistories = data.history || []; 
+                pendingAssignments = data.pending || []; 
+                if (document.getElementById('screen-parent-dashboard').classList.contains('active')) {
+                    renderParentDashboard(); 
+                }
             }
-        }; xhr.send();
+        });
     }
 
     function getColorForRate(rate) { return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)'; }

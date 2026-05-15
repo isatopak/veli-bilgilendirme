@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Ödev Takip Sistemi</title>
+    <title>Ödev Takip Sistemi (Kilitli)</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -133,10 +133,20 @@
 </head>
 <body>
 
+    <div id="licenseModal" class="modal-overlay active" style="z-index: 2000;">
+        <div class="modal-content" style="text-align: center; width: 90%; max-width: 400px; padding: 40px 24px; border-radius: 20px;">
+            <div style="font-size: 56px; margin-bottom: 16px;">🔑</div>
+            <h2 style="color: var(--text-main); margin-top:0;">Sistem Kilitli</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Lütfen size özel Lisans Anahtarını giriniz.</p>
+            <input type="password" id="licenseKeyInput" placeholder="Lisans Anahtarı..." style="text-align: center; margin-bottom: 20px; font-size: 18px; letter-spacing: 2px;">
+            <button class="btn-vista" style="background: var(--success);" onclick="checkLicense()">Sistemi Aç</button>
+        </div>
+    </div>
+
     <div class="app-header" id="mainHeader">
         <button class="back-btn" id="backBtn" onclick="navigateLocal('home')">←</button>
         <span id="headerTitle">Ödev Takip Sistemi</span>
-        <span id="syncStatus">☁️ Bağlanıyor...</span>
+        <span id="syncStatus">☁️ Bekleniyor...</span>
     </div>
 
     <div id="roleModal" class="modal-overlay center-modal">
@@ -342,6 +352,21 @@
     </div>
 
 <script>
+    // --- LİSANS / GÜVENLİK KİLİDİ ---
+    const GIZLI_LISANS_KODU = "Esenkent2026";
+
+    function checkLicense() {
+        const input = document.getElementById('licenseKeyInput').value;
+        if(input === GIZLI_LISANS_KODU) {
+            localStorage.setItem('isa_license', 'active');
+            document.getElementById('licenseModal').classList.remove('active');
+            initRole(); // Şifre doğruysa sistemi başlat
+        } else {
+            alert("Hatalı Lisans Anahtarı! Sisteme giriş reddedildi.");
+            document.getElementById('licenseKeyInput').value = '';
+        }
+    }
+
     // --- FIREBASE BAĞLANTISI ---
     const firebaseConfig = {
       apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc",
@@ -392,7 +417,6 @@
         initAudio(); if(audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
         
-        // Kutlama (Ta-da!) Sesi: C5 - E5 - G5 - C6 Arpeji
         const freqs = [523.25, 659.25, 783.99, 1046.50];
         freqs.forEach((freq, index) => {
             let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
@@ -453,7 +477,12 @@
         let tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
         if(document.getElementById('pendingDate')) document.getElementById('pendingDate').value = tomorrow.toISOString().split('T')[0];
 
-        initRole(); 
+        // LİSANS KONTROLÜ
+        if(localStorage.getItem('isa_license') === 'active') {
+            document.getElementById('licenseModal').classList.remove('active');
+            initRole(); 
+        }
+        
         localTimerInterval = setInterval(updateTimerUI, 200);
     };
 
@@ -928,7 +957,6 @@
 
             let inlineButtons = appRole === 'teacher' ? `<div style="display:inline-flex; margin-left:8px;"><button style="background:var(--success); color:white; border:none; border-radius:4px; width:22px; height:22px; line-height:22px; padding:0; text-align:center; font-weight:bold; cursor:pointer; margin-right:4px;" onclick="event.stopPropagation(); manualGivePoint('${cls}', '${s}', 1)">+</button><button style="background:var(--danger); color:white; border:none; border-radius:4px; width:22px; height:22px; line-height:22px; padding:0; text-align:center; font-weight:bold; cursor:pointer;" onclick="event.stopPropagation(); manualGivePoint('${cls}', '${s}', -1)">-</button></div>` : '';
 
-            // HATA ÇÖZÜMÜ: s.split ile sadece adı alıyorduk, şimdi direkt s diyerek tam numarayı da koyduk
             html += `<tr style="border-bottom:0.5px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="navigateLocal('portfolio'); document.getElementById('portClassSelect').value='${cls}'; loadPortfolioStudents(); document.getElementById('portStudentSelect').value='${s}'; syncBoardData(); renderStudentPortfolio();">
                 <td style="padding:12px 8px; display:flex; align-items:center;">${s}${parentIcon}${streakIcon}</td>
                 <td style="padding:12px 8px; font-weight:bold; color:${getColorForRate(r)};">%${r}</td>
@@ -1024,7 +1052,6 @@
             remaining.splice(rIndex, 1);
         }
         
-        // HATA ÇÖZÜMÜ: Eğer bir nedenden ötürü boş kalırsa listeyi kurtar
         if (!pickedStudent) pickedStudent = classData[cls][0];
 
         activeSpin = { className: cls, studentName: pickedStudent, timestamp: Date.now() }; 
@@ -1037,7 +1064,6 @@
         let t = 0; let c = classData[spinData.className]; if(!c) return;
         
         let i = setInterval(()=>{ 
-            // HATA ÇÖZÜMÜ: Çark dönerken ismin undefined olma riskini sıfırladık
             let randomItem = c[Math.floor(Math.random()*c.length)];
             res.innerText = randomItem.includes(' - ') ? randomItem.split(' - ')[1] : randomItem;
             
@@ -1047,14 +1073,13 @@
                 clearInterval(i); 
                 let celeb = appRole === 'board' ? " 🎉🎊" : "";
                 
-                // Seçilen kişinin adını güvenle ayır
                 let finalName = spinData.studentName.includes(' - ') ? spinData.studentName.split(' - ')[1] : spinData.studentName;
                 res.innerText = "✨ " + finalName + celeb; 
                 
                 res.style.transform = "scale(1.2)"; res.style.color = "var(--success)"; 
                 
                 if (appRole === 'board') {
-                    playWinSound(); // Yeni sesimiz devrede!
+                    playWinSound();
                     if (typeof confetti === "function") {
                         confetti({particleCount: 150, spread: 80, origin: {y: 0.6}});
                     }

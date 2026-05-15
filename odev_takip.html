@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Ödev Takip Sistemi (Firebase Modu)</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; transition: max-width 0.4s; }
+        
+        /* AKILLI TAHTA TASARIMI */
+        body.viewer-mode { max-width: 100%; padding: 30px 40px; }
+        body.viewer-mode .phone-only, body.viewer-mode #saveBtn, body.viewer-mode #btnSaveMaterial, body.viewer-mode .btn-delete-history, body.viewer-mode .modal-footer { display: none !important; }
+        body.viewer-mode .teacher-only { display: none !important; }
+        body.viewer-mode .app-header { font-size: 32px; padding: 24px; border-radius: 20px; }
+        body.viewer-mode .dashboard-grid { display: flex; flex-direction: column; gap: 50px; align-items: center; justify-content: center; margin-top: 20px;}
+        body.viewer-mode .dashboard-grid > .glass-panel { width: 100%; max-width: 1600px; padding: 50px; border-radius: 30px; }
+        body.viewer-mode .framed-heading { font-size: 32px; padding: 24px 30px; border-radius: 20px; margin-bottom: 30px; }
+        body.viewer-mode select, body.viewer-mode input { font-size: 28px; padding: 24px 30px; border-radius: 20px; }
+        body.viewer-mode .btn-vista { font-size: 28px; padding: 26px; border-radius: 20px; }
+        body.viewer-mode #timerDisplay { font-size: 240px; margin: 60px 0; font-weight: 800; text-shadow: 0px 8px 16px rgba(0,0,0,0.5); }
+        body.viewer-mode #randomResult { font-size: 110px; min-height: 150px; margin: 60px 0; font-weight: 800; text-shadow: 0px 8px 16px rgba(0,0,0,0.5); }
+        body.viewer-mode .pool-item { font-size: 24px !important; padding: 14px 24px !important; border-radius: 14px !important; }
+        body.viewer-mode #poolCounterDisplay { font-size: 28px !important; margin-bottom: 20px !important; }
+        body.viewer-mode .teams-grid { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 40px; }
+        body.viewer-mode .team-card { padding: 40px; border-radius: 24px; border-top-width: 8px; }
+        body.viewer-mode .team-card div:first-child { font-size: 28px !important; margin-bottom: 20px !important; }
+        body.viewer-mode .team-member { font-size: 28px; margin-bottom: 18px; }
+        body.viewer-mode .team-member::before { width: 10px; height: 10px; margin-right: 12px; }
+        body.viewer-mode table { font-size: 24px; width: 100%; }
+        body.viewer-mode th, body.viewer-mode td { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        body.viewer-mode .ios-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 50px; max-width: 1400px; margin: 40px auto 60px auto; }
+        body.viewer-mode .ios-icon { width: 160px; height: 160px; border-radius: 40px; font-size: 72px; }
+        body.viewer-mode .ios-label { font-size: 22px; margin-top: 20px; }
+        body.viewer-mode #homeAlertContainer { margin-bottom: 60px; width: 100%; max-width: 1600px; padding: 0 50px; margin-left: auto; margin-right: auto;}
+        body.viewer-mode #alertHeader { font-size: 42px; margin-bottom: 30px; text-align: left; color: var(--text-main); }
+        body.viewer-mode #homeAlertList { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+        body.viewer-mode .assignment-box { padding: 35px; border-radius: 24px; }
+        body.viewer-mode .box-date { font-size: 22px; }
+        body.viewer-mode .box-class { font-size: 64px; margin: 20px 0 10px 0; }
+        body.viewer-mode .box-title { font-size: 26px; line-height: 1.4; word-break: break-word;}
+
+        body:not(.viewer-mode) #timerPanel { display: none !important; }
+
+        .app-header { background-color: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--text-main); padding: 18px 20px; font-size: 20px; font-weight: 600; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
+        .back-btn { position: absolute; left: 16px; background: none; border: none; color: var(--primary); font-size: 26px; cursor: pointer; display: none; padding: 4px 12px; font-weight: 300; outline: none; }
+        #syncStatus { position: absolute; right: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; }
+        .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .container { padding: 0 16px 40px 16px; }
+        .screen { display: none; animation: fadeIn 0.3s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #homeAlertList, #pendingAssignmentsContainer { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 12px; }
+        .assignment-box { padding: 16px; border-radius: 18px; cursor: pointer; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); transition: transform 0.1s; display: flex; flex-direction: column; border: none; outline: none;}
+        .assignment-box:active { transform: scale(0.96); }
+        .box-red { background: linear-gradient(135deg, #FF453A, #FF375F); color: #FFF; }
+        .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
+        .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; justify-content: space-between; align-items: center;}
+        .box-class { font-size: 32px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -1px;}
+        .box-title { font-size: 14px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word;}
+
+        .ios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px 12px; padding: 10px; margin-bottom: 24px; }
+        .ios-icon-btn { display: flex; flex-direction: column; align-items: center; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; outline: none; border: none; }
+        .ios-icon-btn:active .ios-icon { filter: brightness(0.7); transform: scale(0.95); transition: 0.1s; }
+        .ios-icon { width: 76px; height: 76px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 34px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); margin-bottom: 8px; transition: 0.2s; border: none; outline: none; }
+        .ios-label { font-size: 13px; font-weight: 500; color: #fff; text-align: center; }
+        
+        .bg-hw { background: linear-gradient(135deg, #FF9F0A, #FF375F); } 
+        .bg-mat { background: linear-gradient(135deg, #30D158, #32ADE6); } 
+        .bg-assign { background: linear-gradient(135deg, #0A84FF, #5E5CE6); } 
+        .bg-archive { background: linear-gradient(135deg, #8E8E93, #636366); }
+        .bg-port { background: linear-gradient(135deg, #BF5AF2, #FF375F); }
+        .bg-class { background: linear-gradient(135deg, #FFD60A, #FF9F0A); }
+        .bg-tools { background: linear-gradient(135deg, #64D2FF, #0A84FF); }
+
+        .glass-panel { background-color: var(--surface); border-radius: 18px; padding: 20px; margin-bottom: 16px; }
+        .framed-heading { background: var(--surface-variant); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; color: var(--text-main); display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 17px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
+        select, input { width: 100%; padding: 14px 16px; border: none; border-radius: 12px; font-size: 16px; background-color: var(--surface-variant); color: var(--text-main); appearance: none; outline: none; }
+        select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; }
+        .btn-save { background: var(--success); display: none; margin-top: 20px; }
+        .btn-secondary { background: var(--surface-variant); color: var(--primary); } 
+
+        .student-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+        .student-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-radius: 14px; font-weight: 500; font-size: 16px; cursor: pointer; user-select: none; }
+        .status-false { background: rgba(255, 69, 58, 0.15); color: var(--danger); }
+        .status-true { background: rgba(48, 209, 88, 0.15); color: var(--success); }
+
+        .history-card { background: var(--surface-variant); padding: 16px; border-radius: 14px; border-left: 4px solid var(--primary); margin-bottom: 12px; cursor: pointer; }
+        .btn-delete-history { background: none; border: none; font-size: 20px; cursor: pointer; padding: 8px; color: var(--danger); opacity: 0.8; outline: none;}
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 50; display: none; align-items: flex-end; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-overlay.center-modal { align-items: center; z-index: 999; }
+        .modal-content { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; }
+        .modal-overlay.center-modal .modal-content { border-radius: 20px; width: 90%; max-width: 400px; padding: 32px 24px; text-align: center; }
+        .modal-header { padding: 20px 24px; border-bottom: 0.5px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; }
+        .close-btn { background: var(--surface-variant); border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; width: 36px; height: 36px; border-radius: 18px; outline: none; }
+        .modal-body { overflow-y: auto; flex: 1; }
+        .detail-row { display: flex; justify-content: space-between; padding: 16px 24px; border-bottom: 0.5px solid rgba(255,255,255,0.05); font-size: 15px; font-weight: 500; cursor: pointer;}
+        .detail-row:active { background: rgba(255,255,255,0.1); }
+        .detail-row.yapmadi { color: var(--danger); background: rgba(255, 69, 58, 0.05); }
+        .detail-row.yapti { color: var(--success); }
+        
+        .timer-display { font-size: 72px; font-weight: 700; color: var(--primary); text-align: center; margin: 10px 0 20px 0; }
+        .teams-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
+        .team-card { background: var(--surface-variant); border-radius: 14px; padding: 16px; border-top: 4px solid var(--info); }
+        .team-member { font-size: 14px; color: var(--text-main); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;}
+        .team-member::before { content: ""; display: inline-block; width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; }
+        table { border-collapse: collapse; width: 100%; text-align: left; }
+
+        .pool-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 15px; max-height: 250px; overflow-y: auto; padding: 10px 5px;}
+        .pool-item { padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.3s ease; text-align: center; }
+        .pool-item.remaining { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(10, 132, 255, 0.3); }
+        .pool-item.picked { background: rgba(255,255,255,0.08); color: var(--text-muted); opacity: 0.6; text-decoration: line-through; }
+    </style>
+</head>
+<body>
+
+    <div class="app-header" id="mainHeader">
+        <button class="back-btn" id="backBtn" onclick="navigateLocal('home')">←</button>
+        <span id="headerTitle">Ödev Takip Sistemi</span>
+        <span id="syncStatus">☁️ Bağlanıyor...</span>
+    </div>
+
+    <div id="roleModal" class="modal-overlay center-modal">
+        <div class="modal-content">
+            <div style="font-size: 56px; margin-bottom: 16px;">🔐</div>
+            <h2 style="margin-top: 0; color: var(--text-main); font-weight: 600;">Sisteme Giriş</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 15px;">Lütfen kullanıcı modunuzu seçin.</p>
+            <button class="btn-vista" style="background: var(--primary);" onclick="setRole('teacher')">📱 Öğretmen (Kumanda)</button>
+            <button class="btn-vista" style="background: rgba(255,255,255,0.1); color: var(--primary); margin-top: 16px;" onclick="setRole('board')">🖥️ Akıllı Tahta (Dev Ekran)</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div id="screen-home" class="screen active">
+            <div id="homeAlertContainer" style="display: none; margin-top: 10px;">
+                <h2 id="alertHeader" style="color: var(--primary); margin: 0 0 4px 0; font-size: 15px;">📌 Yaklaşan Ödevler</h2>
+                <div id="homeAlertList"></div>
+            </div>
+
+            <div class="ios-grid">
+                <div class="ios-icon-btn teacher-only" onclick="navigateLocal('hw-check')">
+                    <div class="ios-icon bg-hw">📝</div><div class="ios-label">Ödev Kontrol</div>
+                </div>
+                <div class="ios-icon-btn teacher-only" onclick="navigateLocal('mat-check')">
+                    <div class="ios-icon bg-mat">📚</div><div class="ios-label">Materyal</div>
+                </div>
+                <div class="ios-icon-btn teacher-only" onclick="navigateLocal('assign')">
+                    <div class="ios-icon bg-assign">📅</div><div class="ios-label">Ödev Ver</div>
+                </div>
+                <div class="ios-icon-btn" onclick="navigateLocal('portfolio')">
+                    <div class="ios-icon bg-port">🎓</div><div class="ios-label">Öğrenci Port.</div>
+                </div>
+                <div class="ios-icon-btn" onclick="navigateLocal('class-portfolio')">
+                    <div class="ios-icon bg-class">📊</div><div class="ios-label">Sınıf Port.</div>
+                </div>
+                <div class="ios-icon-btn" onclick="navigateLocal('tools')">
+                    <div class="ios-icon bg-tools">🛠️</div><div class="ios-label">Araçlar</div>
+                </div>
+                <div class="ios-icon-btn" onclick="navigateLocal('archive')">
+                    <div class="ios-icon bg-archive">🗂️</div><div class="ios-label">Arşiv</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-hw-check" class="screen">
+            <div id="panelPendingList" style="margin-bottom: 24px;">
+                <div class="framed-heading" style="background: transparent; padding: 0;"><span>⏳ Yaklaşan Teslimatlar</span></div>
+                <div id="pendingAssignmentsContainer"></div>
+            </div>
+
+            <div id="quickCheckForm" class="glass-panel" style="border-left: 4px solid var(--warning);">
+                <div class="framed-heading"><span>📝 Sınıf İçi Ödev Kontrolü</span></div>
+                <div class="form-group">
+                    <select id="classSelect" onchange="document.getElementById('saveBtn').style.display='none'; document.getElementById('studentListContainer').innerHTML='';">
+                        <option value="" disabled selected>Sınıf Seçin...</option>
+                        <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
+                    </select>
+                </div>
+                <div class="form-group"><input type="text" id="assignmentName" placeholder="Örn: Çalışma Kitabı Sayfa 12"></div>
+                <input type="hidden" id="checkDate">
+                <button class="btn-vista" style="background: var(--warning);" onclick="loadClass()">📋 Listeyi Getir</button>
+                <div id="studentListContainer" class="student-list" style="margin-top:16px;"></div>
+                <button id="saveBtn" class="btn-vista btn-save" onclick="saveChecklist()">💾 Kontrolü Kaydet</button>
+            </div>
+        </div>
+
+        <div id="screen-mat-check" class="screen">
+            <div id="panelMaterial" class="glass-panel" style="border-left: 4px solid var(--success);">
+                <div class="framed-heading"><span>📚 Hızlı Materyal Kontrolü</span></div>
+                <div class="form-group">
+                    <select id="materialClassSelect">
+                        <option value="" disabled selected>Sınıf Seçin...</option>
+                        <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
+                    </select>
+                </div>
+                <button class="btn-vista" style="background: var(--success);" onclick="startMaterialCheck()">📋 Kontrolü Başlat</button>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 12px; text-align: center;">Tüm sınıf (Yeşil) getirdi varsayılır. Sadece eksiğe dokunup (Kırmızı) yapın.</p>
+                <div id="materialListContainer" class="student-list" style="margin-top:16px;"></div>
+                <button id="btnSaveMaterial" class="btn-vista btn-save" onclick="saveMaterialCheck()">💾 Eksikleri Kaydet</button>
+            </div>
+        </div>
+
+        <div id="screen-assign" class="screen">
+            <div id="panelAddPending" class="glass-panel" style="border-left: 4px solid var(--primary);">
+                <div class="framed-heading"><span>📅 İleri Tarihli Ödev Ver</span></div>
+                <div class="form-group"><select id="pendingClassSelect"><option value="" disabled selected>Sınıf...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option></select></div>
+                <div class="form-group"><input type="text" id="pendingAssignmentName" placeholder="Örn: S. 12 https://link.com"></div>
+                <div class="form-group"><input type="date" id="pendingDate"></div>
+                <button class="btn-vista" style="background: var(--primary);" onclick="addPendingAssignment()">Kaydet</button>
+            </div>
+        </div>
+
+        <div id="screen-tools" class="screen">
+            <div class="dashboard-grid">
+                <div id="randomPanel" class="glass-panel" style="border-left: 4px solid var(--info);">
+                    <div class="framed-heading"><span>🎲 Rastgele Seçim</span></div>
+                    <div class="form-group">
+                        <select id="randomClassSelect" onchange="loadRandomClass()">
+                            <option value="" disabled selected>Sınıf Seçiniz...</option>
+                            <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
+                        </select>
+                    </div>
+                    <div id="randomActionArea" style="display:none; text-align:center;">
+                        <div id="randomResult" style="font-size: 26px; font-weight: 700; color: var(--info); min-height: 40px; margin: 20px 0;">Kimi Seçeceğiz?</div>
+                        <div id="participationButtons" class="phone-only" style="display:none; gap:12px; margin-bottom: 20px;">
+                            <button class="btn-vista" style="flex:1; background: var(--success);" onclick="giveParticipationPoint(1)">👍 Puan Ver (+1)</button>
+                            <button class="btn-vista" style="flex:1; background: var(--danger);" onclick="giveParticipationPoint(-1)">👎 Eksi Ver (-1)</button>
+                        </div>
+                        <div style="display:flex; gap:12px; margin-bottom: 24px;">
+                            <button class="btn-vista" style="flex:2; background: var(--info);" onclick="pickRandomStudent()">🎲 Seç</button>
+                            <button class="btn-vista btn-secondary" style="flex:1;" onclick="resetRandomPool()">Sıfırla</button>
+                        </div>
+                        <div id="poolCounterDisplay" style="font-size: 14px; font-weight: 600; color: var(--info); margin-bottom: 8px;"></div>
+                        <div id="randomPoolList" class="pool-grid"></div>
+                    </div>
+                </div>
+
+                <div id="timerPanel" class="glass-panel" style="text-align: center; border-left: 4px solid var(--danger);">
+                    <div class="framed-heading" style="justify-content: center;"><span>⏱️ Geri Sayım</span></div>
+                    <div id="timerDisplay" class="timer-display">05:00</div>
+                    <div>
+                        <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;">
+                            <button class="btn-vista btn-secondary" style="padding: 10px;" onclick="setTimer(1)">1 Dk</button>
+                            <button class="btn-vista btn-secondary" style="padding: 10px;" onclick="setTimer(3)">3 Dk</button>
+                            <button class="btn-vista btn-secondary" style="padding: 10px;" onclick="setTimer(5)">5 Dk</button>
+                            <button class="btn-vista btn-secondary" style="padding: 10px;" onclick="setTimer(10)">10 Dk</button>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn-vista" id="btnTimerStart" style="flex:2; background: var(--success);" onclick="startTimer()">▶ Başlat</button>
+                            <button class="btn-vista" id="btnTimerPause" style="flex:2; background: var(--warning); display:none;" onclick="pauseTimer()">⏸ Duraklat</button>
+                            <button class="btn-vista" style="flex:1; background: var(--danger);" onclick="resetTimer()">⏹</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="groupsPanel" class="glass-panel" style="border-left: 4px solid var(--primary);">
+                    <div class="framed-heading"><span>👥 Takımlar</span></div>
+                    <div>
+                        <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                            <select id="groupClassSelect" style="flex: 2;"><option value="" disabled selected>Sınıf...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option></select>
+                            <select id="groupCountSelect" style="flex: 1;"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select>
+                        </div>
+                        <button class="btn-vista" style="background: var(--info); margin-bottom: 24px;" onclick="generateGroups()">🎲 Dağıt</button>
+                    </div>
+                    <div id="groupsContainer"><div style="text-align: center; color: var(--text-muted); padding: 20px;">Grup yok.</div></div>
+                </div>
+            </div> 
+        </div>
+
+        <div id="screen-archive" class="screen">
+            <div class="glass-panel">
+                <div class="framed-heading"><span>🗂️ Son Kontroller (Arşiv)</span></div>
+                <div class="form-group">
+                    <select id="archiveClassSelect" onchange="renderGeneralHistory()">
+                        <option value="" disabled selected>Sınıf Seçiniz...</option>
+                        <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
+                    </select>
+                </div>
+                <div id="generalHistoryContainer">
+                    <div style="text-align: center; color: var(--text-muted); padding: 24px;">Kayıtları görmek için sınıf seçin.</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-portfolio" class="screen">
+            <div class="split-layout">
+                <div class="left-panel">
+                    <div class="glass-panel">
+                        <div class="form-group"><select id="portClassSelect" onchange="loadPortfolioStudents(); syncBoardData();"><option value="" disabled selected>Sınıf Seçiniz...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option></select></div>
+                        <div class="form-group"><select id="portStudentSelect" disabled onchange="renderStudentPortfolio(); syncBoardData();"><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
+                    </div>
+                </div>
+                <div class="right-panel"><div id="portfolioContainer"><div style="text-align: center; color: var(--text-muted); padding: 24px;">Kayıtları görmek için sol taraftan öğrenci seçin.</div></div></div>
+            </div>
+        </div>
+
+        <div id="screen-class-portfolio" class="screen">
+            <div class="split-layout">
+                <div class="left-panel">
+                    <div class="glass-panel">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                            <span style="font-weight:600; color:var(--text-muted); font-size:13px; text-transform:uppercase;">Sınıf Seçimi</span>
+                            <button class="teacher-only" style="background:var(--success); border:none; color:white; border-radius:8px; padding:6px 12px; font-weight:bold; cursor:pointer;" onclick="exportToCSV()">📥 Excel İndir</button>
+                        </div>
+                        <div class="form-group"><select id="classPortSelect" onchange="renderClassPortfolio(); syncBoardData();"><option value="" disabled selected>Sınıf Seçiniz...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option></select></div>
+                    </div>
+                </div>
+                <div class="right-panel"><div id="classPortfolioContainer"><div style="text-align: center; color: var(--text-muted); padding: 24px;">Kayıtları görmek için bir sınıf seçin.</div></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="historyModal" class="modal-overlay" onclick="closeModalOnOutsideClick(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div><h2 id="modalClassName">Sınıf Adı</h2><p id="modalAssignmentName">Ödev Konusu</p></div>
+                <button class="close-btn" onclick="closeHistoryModal()">×</button>
+            </div>
+            <div id="modalDetailsList" class="modal-body"></div>
+            <div class="phone-only" style="padding: 12px; text-align: center; font-size: 12px; color: var(--warning); background: var(--surface-variant);">* Öğrenci durumunu değiştirmek için isme dokunun.</div>
+        </div>
+    </div>
+
+<script>
+    // --- FIREBASE BAĞLANTISI ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc",
+      authDomain: "odevtakipsistemi-b9fff.firebaseapp.com",
+      databaseURL: "https://odevtakipsistemi-b9fff-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "odevtakipsistemi-b9fff",
+      storageBucket: "odevtakipsistemi-b9fff.firebasestorage.app",
+      messagingSenderId: "354499388490",
+      appId: "1:354499388490:web:b2a53dba1dc8d5c20732b3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const dbRef = db.ref('odevData');
+
+    const TEACHER_PIN = "294294"; const BOARD_PIN = "0000";
+
+    let appRole = localStorage.getItem('appRole');
+    let currentChecklist = []; let savedHistories = []; let randomPools = {}; let participationScores = {}; 
+    let currentModalRecordId = null; 
+    let activeGroups = { className: '', groupCount: 0, teams: [], timestamp: 0 };
+    let timerState = { running: false, endTime: 0, remaining: 300000 }; 
+    let localTimerInterval = null;
+    let activeSpin = { className: '', studentName: '', timestamp: 0 }; 
+    let pendingAssignments = []; 
+    let parentConnections = []; 
+    let boardSync = { screen: 'home', portClass: '', portStudent: '', classPort: '' };
+    
+    let initialSyncDone = false; 
+    let pushHistory = {}; 
+
+    // --- SES EFEKTLERİ MODÜLÜ (Web Audio API) ---
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    }
+    
+    function playTick() {
+        initAudio(); if(audioCtx.state === 'suspended') audioCtx.resume();
+        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    function playWinSound() {
+        initAudio(); if(audioCtx.state === 'suspended') audioCtx.resume();
+        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'triangle'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+    }
+
+    function getColorForRate(rate) { return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)'; }
+
+    function linkYakalayici(metin) {
+        if (!metin) return "";
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return metin.replace(urlRegex, function(url) {
+            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 4px 8px; background: var(--primary); color: white; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold;" onclick="event.stopPropagation();">Git 🔗</a>';
+        });
+    }
+
+    function calculateStreak(className, studentName) {
+        let streak = 0;
+        for(let i=0; i<savedHistories.length; i++) {
+            let r = savedHistories[i];
+            if(r.className === className) {
+                let asgn = r.assignment || "";
+                if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) {
+                    let s = r.details.find(x => x.name === studentName);
+                    if(s) {
+                        if(s.isDone) { streak++; } 
+                        else { break; }
+                    }
+                }
+            }
+        }
+        return streak;
+    }
+
+    // --- ONESIGNAL BİLDİRİM MOTORU (CORS KORUMALI PROXY TÜNELİ İLE) ---
+    function getNext1530() {
+        let now = new Date();
+        let target = new Date(now);
+        target.setHours(15, 30, 0, 0);
+
+        if (now > target) { target.setDate(target.getDate() + 1); }
+        while (target.getDay() === 0 || target.getDay() === 6) { target.setDate(target.getDate() + 1); }
+
+        let tzOffset = -target.getTimezoneOffset();
+        let sign = tzOffset >= 0 ? '+' : '-';
+        let pad = (num) => String(Math.abs(num)).padStart(2, '0');
+        let tzString = `GMT${sign}${pad(Math.floor(tzOffset/60))}${pad(tzOffset%60)}`;
+        return `${target.getFullYear()}-${pad(target.getMonth() + 1)}-${pad(target.getDate())} ${pad(target.getHours())}:${pad(target.getMinutes())}:${pad(target.getSeconds())} ${tzString}`;
+    }
+
+    function sendPushNotification(className) {
+        if(appRole !== 'teacher') return; 
+        
+        let todayStr = new Date().toLocaleDateString('tr-TR');
+        if (pushHistory[className] === todayStr) return; 
+
+        let sendTime = getNext1530();
+        
+        let payload = {
+            app_id: "bf09fc9c-611b-49ab-8ec6-6c154d450d1c",
+            filters: [ { "field": "tag", "key": "className", "relation": "=", "value": className } ],
+            headings: { "en": "🔔 İngilizce Dersi Bilgilendirmesi", "tr": "🔔 İngilizce Dersi Bilgilendirmesi" },
+            contents: { "en": "Öğrencimiz için sisteme yeni bir değerlendirme (ödev/katılım/materyal) girilmiştir. Detayları görmek için panele göz atabilirsiniz.", "tr": "Öğrencimiz için sisteme yeni bir değerlendirme (ödev/katılım/materyal) girilmiştir. Detayları görmek için panele göz atabilirsiniz." },
+            send_after: sendTime
+        };
+
+        // YENİ: CORS engelini aşmak için proxy tünelini kullandık
+        fetch("https://corsproxy.io/?https://onesignal.com/api/v1/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Basic os_v2_app_x4e7zhdbdne2xdwgnqku2rindqlhyemsv3xup6upvd2sknjfuxbzlvclfq23tw3bvga6kmgbv4g2xlmew5r6trbfhfao5ytdmvobhna"
+            },
+            body: JSON.stringify(payload)
+        }).then(res => res.json()).then(data => {
+            console.log("Bildirim proxy tünelinden başarıyla geçti:", data);
+            pushHistory[className] = todayStr; 
+            saveToCloud();
+        }).catch(err => console.error("Bildirim Proxy Hatası:", err));
+    }
+
+    const classData = {
+        "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
+        "5C": ["36 - Ada Temoçin", "88 - Badenur Kaya", "128 - Buğlem Altındaş", "135 - Defne Aktaş", "198 - Gamzenur Yıldız", "224 - Kerem Talha Akyıldız", "246 - Mehmet Timur Yalçın", "262 - Miraç Ege Taşhan", "263 - Miran Durma", "265 - Muhammed Arif Kavaklı", "307 - Solin Rohiv Görür", "344 - Ömer Kayra Mutlu", "355 - Timur Ula", "373 - Seyit Ali Şahin", "413 - Zeynep Cansu Bekdemir", "419 - Azra Geliç", "425 - Berk Emir Arıkan", "438 - Ecrin Ercan", "439 - Edip Yusuf Aydemir", "477 - Mira Su Ürentürk", "487 - Nazlı Ula", "488 - Nehir Armağan Bayır", "492 - Poyraz Ayçetin", "495 - Ramazan İsot", "499 - Semih Şentürk", "501 - Umut Yavaş", "508 - Zeynep Nisa Arancı"],
+        "5D": ["87 - Ayşegül Altunyuva", "116 - Berat Kurubal", "118 - Belinay Sarıbulak", "137 - Derin Mebrule Alper", "187 - Eyüp Arda Karabulut", "222 - Furkan Yakupoğlu", "274 - Resul Güven", "289 - Nazlı Çevik", "291 - Kaan Efe Keten", "360 - Elif Kocaman", "376 - Yusuf Buğra Demirci", "390 - Adanaz Gezer", "414 - Asrın Kurşun", "417 - Ayaz Aksoy", "434 - Devran Çetin", "440 - Ege Özel", "464 - Hümeyra Nas Baloğlu", "466 - Tuana Dundar", "490 - Osman Meral", "493 - Poyraz Karamuk", "498 - Rumeysa Akdemir", "504 - Yağmur Hilal Geçmez", "507 - Zehra Şenses", "541 - Çağrı Karapınar", "543 - Gönül Keleş"],
+        "5E": ["52 - Afşin Kuruca", "142 - Ela Nur Yıldız", "159 - Elif İlhan", "165 - Erva Acar", "169 - Eslimnur Kaya", "170 - Esma Çakal", "175 - Turgut Kaplan", "179 - Hira Elif Kartal", "201 - Hasan Etem Kurubal", "210 - Hira Sena Üzel", "269 - Muhammed Miraç Şirin", "278 - Murat Yıldız", "286 - Nasuh Buğra Yılmaz", "299 - Özgün Ada Erol", "313 - Muhammed Eymen Aslan", "319 - Ömer Sefa Gündüz", "328 - Elif Naz Gedik", "333 - Eda Nil Gedik", "357 - Eylül Çalışkan", "388 - Tuğçe Karakaya", "395 - Muhammet Talha Örün", "408 - Ali Kemal Aydoğdu", "421 - Selim Yıldırım", "448 - Elifnaz Akgül", "449 - Talha Karaca", "469 - Kaan Demir", "489 - Neslihan İşcan", "513 - Taha Tatay"],
+        "5YDA": ["124 - Berkay Karagöz", "189 - Çınar Ali Demir", "209 - Sevgi Şener", "433 - Derin Somer", "451 - Emir Diler", "216 - Hüseyin Metin Ünlü", "292 - Ömer Toprak Kurubal", "363 - Hüseyin Kayra Demir", "415 - Asya Gökmen", "428 - Buğra Çınar", "475 - Melinay Perçin", "246 - Mehmet Timur Yalçın", "373 - Seyit Ali Şahin", "499 - Semih Şentürk", "501 - Umut Yavaş", "116 - Berat Kurubal", "414 - Asrın Kurşun", "440 - Ege Özel", "466 - Tuana Dündar", "170 - Esma Çakal", "408 - Ali Kemal Aydoğdu", "59 - Ahsen Ece Özbek", "75 - Almira Aydın", "111 - Bengü Kılıç", "153 - Elif İkra Bektaş", "202 - Hilal Erva Kurubal", "312 - Efecan Halitoğulları", "410 - Zehra Karabulut", "422 - Beren Dere", "494 - Poyraz Kartal"],
+        "6A": ["2 - Ahmet Ayaz Altıntaş", "4 - Ahmet Dere", "5 - Anıl Ergin Aksoy", "11 - Ayaz Nergiz", "14 - Can Karakaya", "17 - Çınar Yüce", "30 - Derin Eren", "35 - Dilara Aydın", "48 - Ela Nur Özbek", "62 - Ezgi Özenses", "63 - Nas Maya Kurubal", "70 - Rüzgar Can", "73 - Saliha Uysal", "84 - Selen Özdemir", "91 - Umut Bozkurt", "93 - Yiğit Er", "94 - Yusuf Hamza Özbek", "96 - Zeynep Balta", "102 - Zeynep Kalender", "105 - İlkim Nehir Tepe", "107 - Ekin Fırat Koç", "109 - Serin Üzel", "125 - Rüzgar İnan Şık", "126 - Nisa Yağmur Ülker", "127 - Eslem Nisa Altındaş", "140 - Ata Can Özdemir", "147 - Sare Karabulut", "238 - Elif Bahar Ceylan", "370 - Solin Deniz Koçin", "389 - Yusuf Uras Kılıç"],
+        "7E": ["34 - Arin Eray Erdoğan", "53 - Mert Ali Balta", "60 - Beyza Gül Kalyon", "69 - Ahmet Ediz Arısoy", "101 - Asenat Aras", "112 - Barış Kazankaya", "161 - Hayrunnisa Toraman", "230 - Muhammed Mahmudov", "247 - Eda Ece Balyemez", "284 - Hafsa Öçal", "340 - Sinem Gül", "341 - Sudenaz Gürsoy", "342 - Sümeyye Kadem Işık", "345 - Tuana Şahin", "348 - Yağız Kaya", "364 - Yusuf Kuzey Özdemir", "365 - Yusuf Özkan Koç", "368 - Tolgahan Paslı", "409 - Efe Mesut Yıldırım", "441 - Dila Taşdemir", "693 - Mustafa Özgür Kütük", "884 - Fadime Eldemir"],
+        "TEST": ["999 - Test Öğrencisi"]
+    };
+
+    window.onload = function() {
+        const today = new Date().toLocaleDateString('tr-TR');
+        if(document.getElementById('checkDate')) document.getElementById('checkDate').value = today;
+        let tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+        if(document.getElementById('pendingDate')) document.getElementById('pendingDate').value = tomorrow.toISOString().split('T')[0];
+
+        initRole(); 
+        localTimerInterval = setInterval(updateTimerUI, 200);
+    };
+
+    function initRole() { if (!appRole) { document.getElementById('roleModal').classList.add('active'); } else { applyRole(); } }
+
+    function setRole(role) {
+        if (role === 'teacher') { if (prompt("Öğretmen Şifresi:") !== TEACHER_PIN) return alert("Hatalı şifre!"); } 
+        else if (role === 'board') { if (prompt("Akıllı Tahta Şifresi:") !== BOARD_PIN) return alert("Hatalı şifre!"); }
+        appRole = role; localStorage.setItem('appRole', role);
+        document.getElementById('roleModal').classList.remove('active'); applyRole(); 
+    }
+
+    function applyRole() {
+        var statusEl = document.getElementById('syncStatus'); document.body.classList.remove('viewer-mode');
+        if (appRole === 'board') {
+            document.body.classList.add('viewer-mode'); navigateLocal('home');
+        } else if (appRole === 'teacher') {
+            navigateLocal('home');
+        }
+        loadFromCloud(); 
+    }
+
+    function loadFromCloud() {
+        var statusEl = document.getElementById('syncStatus');
+        
+        dbRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                var data = snapshot.val();
+                
+                savedHistories = data.history || [];
+                participationScores = data.scores || {};
+                pendingAssignments = data.pending || []; 
+                timerState = data.timer || { running: false, endTime: 0, remaining: 300000 };
+                parentConnections = data.parentConnections || [];
+                pushHistory = data.pushHistory || {}; 
+
+                if (!initialSyncDone) {
+                    activeGroups = data.groups || { className: '', groupCount: 0, teams: [], timestamp: 0 };
+                    activeSpin = data.spin || { className: '', studentName: '', timestamp: 0 };
+                    randomPools = data.pools || {};
+                    initialSyncDone = true; 
+                    refreshCurrentScreen();
+                    statusEl.innerHTML = '<span class="live-indicator"></span>Canlı Bağlantı';
+                    return; 
+                }
+                
+                let incomingPools = data.pools || {};
+                let poolChanged = JSON.stringify(randomPools) !== JSON.stringify(incomingPools);
+                randomPools = incomingPools;
+
+                if(data.groups && data.groups.timestamp > (activeGroups.timestamp || 0)) {
+                    activeGroups = data.groups; 
+                    if(appRole === 'board') { navigateLocal('tools'); setTimeout(() => { document.getElementById('groupsPanel').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100); }
+                    if(document.getElementById('screen-tools').classList.contains('active')) renderGroups(); 
+                } else if (data.groups) { activeGroups = data.groups; }
+
+                if(data.spin && data.spin.timestamp > (activeSpin.timestamp || 0)) { 
+                    if(appRole === 'board') {
+                        navigateLocal('tools'); 
+                        document.getElementById('randomClassSelect').value = data.spin.className;
+                        document.getElementById('randomActionArea').style.display = 'block'; 
+                        setTimeout(() => { document.getElementById('randomPanel').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 100);
+                    }
+                    activeSpin = data.spin; 
+                    displaySpinAnimation(activeSpin); 
+                } 
+                else if (poolChanged && document.getElementById('screen-tools').classList.contains('active')) {
+                    renderRandomPool();
+                }
+
+                if(data.boardSync && appRole === 'board') {
+                    let bs = data.boardSync;
+                    if(bs.screen === 'portfolio' || bs.screen === 'class-portfolio') {
+                        if(document.getElementById('screen-' + bs.screen) && !document.getElementById('screen-' + bs.screen).classList.contains('active')) navigateLocal(bs.screen);
+                    }
+                    if(bs.screen === 'portfolio') {
+                        if(bs.portClass && document.getElementById('portClassSelect').value !== bs.portClass) { document.getElementById('portClassSelect').value = bs.portClass; loadPortfolioStudents(); }
+                        if(bs.portStudent && document.getElementById('portStudentSelect').value !== bs.portStudent) { document.getElementById('portStudentSelect').value = bs.portStudent; renderStudentPortfolio(); }
+                    } else if(bs.screen === 'class-portfolio') {
+                        if(bs.classPort && document.getElementById('classPortSelect').value !== bs.classPort) { document.getElementById('classPortSelect').value = bs.classPort; renderClassPortfolio(); }
+                    }
+                }
+
+                refreshCurrentScreen();
+                statusEl.innerHTML = '<span class="live-indicator"></span>Canlı Bağlantı';
+            } else {
+                initialSyncDone = true;
+                statusEl.innerHTML = '<span class="live-indicator" style="background-color: var(--warning);"></span>Yeni Veritabanı';
+            }
+        });
+    }
+
+    function saveToCloud() {
+        if (!initialSyncDone) return;
+        var allData = { 
+            history: savedHistories, 
+            pools: randomPools, 
+            scores: participationScores, 
+            groups: activeGroups, 
+            timer: timerState, 
+            spin: activeSpin, 
+            pending: pendingAssignments, 
+            parentConnections: parentConnections, 
+            boardSync: boardSync,
+            pushHistory: pushHistory 
+        };
+        dbRef.set(allData).catch(function(error) { console.error("Firebase Kayıt Hatası:", error); });
+    }
+
+    function manualGivePoint(cls, stu, p) {
+        if (!participationScores[cls]) participationScores[cls] = {};
+        participationScores[cls][stu] = (participationScores[cls][stu] || 0) + p;
+        saveToCloud();
+        sendPushNotification(cls); 
+        
+        if(document.getElementById('screen-class-portfolio').classList.contains('active')) renderClassPortfolio();
+        if(document.getElementById('screen-portfolio').classList.contains('active')) renderStudentPortfolio();
+    }
+
+    function navigateLocal(screenId) {
+        const screens = document.querySelectorAll('.screen');
+        for (let i = 0; i < screens.length; i++) screens[i].classList.remove('active');
+        document.getElementById('screen-' + screenId).classList.add('active');
+        
+        const headerTitle = document.getElementById('headerTitle'); const backBtn = document.getElementById('backBtn');
+        if (screenId === 'home') { headerTitle.innerText = 'Ödev Takip Sistemi'; backBtn.style.display = 'none'; } 
+        else { 
+            backBtn.style.display = 'block'; 
+            if(screenId==='hw-check') headerTitle.innerText = 'Ödev Kontrol';
+            else if(screenId==='mat-check') headerTitle.innerText = 'Materyal Kontrol';
+            else if(screenId==='assign') headerTitle.innerText = 'Ödev Ver';
+            else if(screenId==='portfolio') headerTitle.innerText = 'Öğrenci Portfolyosu';
+            else if(screenId==='class-portfolio') headerTitle.innerText = 'Sınıf Portfolyosu';
+            else if(screenId==='archive') headerTitle.innerText = 'Geçmiş Arşiv';
+            else if(screenId==='tools') headerTitle.innerText = 'Araçlar';
+        }
+        refreshCurrentScreen();
+    }
+
+    function refreshCurrentScreen() {
+        checkDueAssignments();
+        if(document.getElementById('screen-hw-check').classList.contains('active')) renderPendingAssignments();
+        if(document.getElementById('screen-archive').classList.contains('active')) renderGeneralHistory();
+        if(document.getElementById('screen-class-portfolio').classList.contains('active')) renderClassPortfolio();
+        if(document.getElementById('screen-portfolio').classList.contains('active')) renderStudentPortfolio();
+    }
+
+    function syncBoardData() {
+        if(appRole === 'teacher') {
+            boardSync.portClass = document.getElementById('portClassSelect').value || '';
+            boardSync.portStudent = document.getElementById('portStudentSelect').value || '';
+            boardSync.classPort = document.getElementById('classPortSelect').value || '';
+            saveToCloud();
+        }
+    }
+
+    function hasParent(className, studentName) {
+        if (!parentConnections || !Array.isArray(parentConnections)) return false;
+        return parentConnections.some(p => p.className === className && p.studentName === studentName);
+    }
+
+    function renderPendingAssignments() {
+        const container = document.getElementById('pendingAssignmentsContainer'); if(!container) return; container.innerHTML = '';
+        if (pendingAssignments.length === 0) { container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 10px;">Bekleyen yok.</div>'; return; }
+        
+        let sorted = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate)); 
+        const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+        let html = '';
+        sorted.forEach(p => {
+            let isTodayOrPast = p.dueDate <= todayStr;
+            let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
+            let icon = isTodayOrPast ? '🚨' : '⏳';
+            let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
+            
+            html += `<div class="assignment-box ${boxClass}" onclick="startPendingCheck(${p.id})">
+                <div class="box-date"><span>${icon} ${displayDate}</span> <button class='btn-delete-history phone-only' style="padding:0; color:inherit; font-size:16px; margin:0;" onclick='deletePending(event, ${p.id})'>🗑️</button></div>
+                <div class="box-class">${p.className}</div>
+                <div class="box-title">${linkYakalayici(p.assignment)}</div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function addPendingAssignment() {
+        if(appRole === 'board') return;
+        const pClass = document.getElementById('pendingClassSelect').value; const pName = document.getElementById('pendingAssignmentName').value; const pDate = document.getElementById('pendingDate').value;
+        if(!pClass || !pName || !pDate) return alert('Lütfen sınıf, konu ve tarih alanlarını doldurun.');
+        pendingAssignments.push({ id: Date.now(), className: pClass, assignment: pName, dueDate: pDate });
+        saveToCloud(); document.getElementById('pendingAssignmentName').value = ''; alert('Ödev Başarıyla Verildi!'); navigateLocal('home');
+    }
+
+    function deletePending(event, id) { 
+        event.stopPropagation(); 
+        if (confirm('Bu bekleyen ödevi silmek istediğinize emin misiniz?')) { pendingAssignments = pendingAssignments.filter(p => p.id !== id); saveToCloud(); refreshCurrentScreen(); }
+    }
+    
+    function startPendingCheck(id) { 
+        const pending = pendingAssignments.find(p => p.id === id); if(!pending) return; 
+        navigateLocal('hw-check');
+        document.getElementById('classSelect').value = pending.className; document.getElementById('assignmentName').value = pending.assignment; document.getElementById('checkDate').value = new Date().toLocaleDateString('tr-TR'); 
+        document.getElementById('saveBtn').setAttribute('data-pending-id', id); loadClass(); 
+        document.getElementById('quickCheckForm').scrollIntoView({behavior: 'smooth'});
+    }
+
+    function openPendingFromAlert(event, id) { if (appRole === 'board') return; if (event) event.stopPropagation(); startPendingCheck(id); }
+    
+    function checkDueAssignments() {
+        const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0]; let alerts = [];
+        let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+        
+        sortedPending.forEach(p => {
+            let isTodayOrPast = p.dueDate <= todayStr;
+            let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
+            let icon = isTodayOrPast ? '🚨' : '⏳';
+            let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
+            
+            alerts.push(`<div class="assignment-box ${boxClass}" onclick="openPendingFromAlert(event, ${p.id})">
+                <div class="box-date"><span>${icon} ${displayDate}</span></div>
+                <div class="box-class">${p.className}</div>
+                <div class="box-title">${linkYakalayici(p.assignment)}</div>
+            </div>`);
+        });
+        
+        const alertContainer = document.getElementById('homeAlertContainer');
+        if (alerts.length > 0) { document.getElementById('homeAlertList').innerHTML = alerts.join(''); alertContainer.style.display = 'block'; } else { alertContainer.style.display = 'none'; }
+    }
+
+    function startMaterialCheck() {
+        if(appRole === 'board') return;
+        const cls = document.getElementById('materialClassSelect').value; if(!cls) return alert("Sınıf seçin!");
+        const students = classData[cls]; currentChecklist = [];
+        for(let i=0; i<students.length; i++) { currentChecklist.push({ name: students[i], kitap: true, defter: true }); }
+        renderMaterialList(); document.getElementById('btnSaveMaterial').style.display = 'block';
+    }
+
+    function renderMaterialList() {
+        const container = document.getElementById('materialListContainer'); container.innerHTML = '';
+        for(let i=0; i<currentChecklist.length; i++) {
+            const student = currentChecklist[i]; const div = document.createElement('div'); div.className = "student-item"; div.style.display = "flex"; div.style.flexDirection = "column"; div.style.gap = "8px"; div.style.background = "var(--surface-variant)";
+            div.innerHTML = `<div style="font-weight: 600; font-size: 16px;">${student.name}</div><div style="display: flex; gap: 8px; width: 100%;"><button onclick="toggleMaterial(${i}, 'kitap')" style="flex:1; padding: 10px; border: none; border-radius: 8px; font-weight: bold; color: white; background: ${student.kitap ? 'var(--success)' : 'var(--danger)'};">${student.kitap ? '📘 Kitap Var' : '❌ Kitap Yok'}</button><button onclick="toggleMaterial(${i}, 'defter')" style="flex:1; padding: 10px; border: none; border-radius: 8px; font-weight: bold; color: white; background: ${student.defter ? 'var(--success)' : 'var(--danger)'};">${student.defter ? '📙 Defter Var' : '❌ Defter Yok'}</button></div>`;
+            container.appendChild(div);
+        }
+    }
+
+    function toggleMaterial(index, type) { currentChecklist[index][type] = !currentChecklist[index][type]; renderMaterialList(); }
+
+    function saveMaterialCheck() {
+        const cls = document.getElementById('materialClassSelect').value; const date = document.getElementById('checkDate').value;
+        let kL = [], dL = [], kE = 0, dE = 0;
+        currentChecklist.forEach(s => { kL.push({ name: s.name, isDone: s.kitap }); if(!s.kitap) kE++; dL.push({ name: s.name, isDone: s.defter }); if(!s.defter) dE++; });
+        if(kE > 0) savedHistories.unshift({ id: Date.now(), date: date, className: cls, assignment: "KİTAP EKSİK", done: (currentChecklist.length - kE), notDone: kE, details: kL });
+        if(dE > 0) savedHistories.unshift({ id: Date.now() + 1, date: date, className: cls, assignment: "DEFTER EKSİK", done: (currentChecklist.length - dE), notDone: dE, details: dL });
+        if(kE === 0 && dE === 0) alert("Eksik yok!"); else { saveToCloud(); sendPushNotification(cls); alert('Kaydedildi!'); }
+        document.getElementById('materialListContainer').innerHTML = ''; document.getElementById('btnSaveMaterial').style.display = 'none'; navigateLocal('home');
+    }
+
+    function loadClass() {
+        if (appRole === 'board') return;
+        const selectedClass = document.getElementById('classSelect').value; const assignmentName = document.getElementById('assignmentName').value;
+        if (!selectedClass || !assignmentName) return alert("Sınıf ve konu girin!");
+        currentChecklist = classData[selectedClass].map(s => ({ name: s, isDone: false }));
+        renderStudentList(); document.getElementById('saveBtn').style.display = 'block';
+    }
+
+    function renderStudentList() {
+        const container = document.getElementById('studentListContainer'); container.innerHTML = '';
+        currentChecklist.forEach((s, i) => {
+            const div = document.createElement('div'); div.className = "student-item " + (s.isDone ? 'status-true' : 'status-false');
+            if (appRole !== 'board') div.onclick = function() { currentChecklist[i].isDone = !currentChecklist[i].isDone; renderStudentList(); };
+            div.innerHTML = `<span>${s.name}</span><span style='font-size:20px;'>${s.isDone ? '✔ Yaptı' : '✖ Eksik'}</span>`; container.appendChild(div);
+        });
+    }
+
+    function saveChecklist() {
+        if (appRole === 'board') return; 
+        const cls = document.getElementById('classSelect').value; const asg = document.getElementById('assignmentName').value; const cDate = document.getElementById('checkDate').value;
+        let dC = currentChecklist.filter(s => s.isDone).length;
+        savedHistories.unshift({ id: Date.now(), date: cDate, className: cls, assignment: asg, done: dC, notDone: currentChecklist.length - dC, details: currentChecklist });
+        
+        const pId = document.getElementById('saveBtn').getAttribute('data-pending-id');
+        if(pId) { pendingAssignments = pendingAssignments.filter(p => p.id != pId); document.getElementById('saveBtn').removeAttribute('data-pending-id'); } 
+        
+        document.getElementById('studentListContainer').innerHTML = ''; document.getElementById('saveBtn').style.display = 'none'; document.getElementById('assignmentName').value = '';
+        saveToCloud(); 
+        sendPushNotification(cls); 
+        alert('Kaydedildi!'); navigateLocal('home'); 
+    }
+
+    function deleteRecord(event, recordId) {
+        event.stopPropagation(); if (appRole === 'board') return; 
+        if (confirm('Bu geçmiş kaydı tamamen silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) { 
+            savedHistories = savedHistories.filter(h => h.id !== recordId); saveToCloud(); refreshCurrentScreen(); 
+        }
+    }
+
+    function renderGeneralHistory() {
+        const container = document.getElementById('generalHistoryContainer'); if(!container) return; container.innerHTML = '';
+        const selectedClass = document.getElementById('archiveClassSelect').value;
+
+        if (!selectedClass) {
+            return container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px;">Kayıtları görmek için sınıf seçin.</div>';
+        }
+
+        let filteredHistories = savedHistories.filter(h => h.className === selectedClass);
+
+        if (filteredHistories.length === 0) {
+            return container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px;">Bu sınıfa ait geçmiş kayıt bulunmuyor.</div>';
+        }
+        
+        filteredHistories.forEach(record => {
+            let asgn = record.assignment || ""; let isMat = asgn.includes('EKSİK') || asgn.includes('MATERYAL');
+            let icon = isMat ? '📚' : '📝'; let tLbl = isMat ? 'Materyal Kontrolü' : 'Ödev Kontrolü'; let bCol = isMat ? 'var(--danger)' : 'var(--success)';
+
+            const div = document.createElement('div'); div.className = 'history-card'; div.style.borderLeftColor = bCol; 
+            div.onclick = function() { openHistoryModal(record.id); };
+            div.innerHTML = `<div style='display: flex; justify-content: space-between; align-items: flex-start;'><div><div style="font-size:11px; font-weight:bold; color:${bCol}; margin-bottom:4px;">${icon} ${tLbl}</div><h3 style="margin-top:0;">${record.className} - ${linkYakalayici(record.assignment)}</h3><p>📅 ${record.date}</p></div><button class='btn-delete-history phone-only' onclick='deleteRecord(event, ${record.id})'>🗑️</button></div><div class='stats'><span style='color: var(--success)'>✔ ${record.done || 0} </span> &nbsp; <span style='color: var(--danger)'>✖ ${record.notDone || 0} </span></div>`;
+            container.appendChild(div);
+        });
+    }
+
+    function openHistoryModal(recordId) {
+        let record = savedHistories.find(h => h.id === recordId); if (!record) return; currentModalRecordId = recordId; 
+        let asgn = record.assignment || ""; let icon = asgn.includes('EKSİK') ? '📚' : '📝';
+        
+        document.getElementById('modalClassName').innerText = record.className; 
+        document.getElementById('modalAssignmentName').innerHTML = icon + " " + linkYakalayici(record.assignment) + " (" + record.date + ")";
+        
+        const listContainer = document.getElementById('modalDetailsList'); listContainer.innerHTML = '';
+        
+        for(let i=0; i<record.details.length; i++) { 
+            const student = record.details[i]; 
+            const row = document.createElement('div'); 
+            row.className = "detail-row " + (student.isDone ? 'yapti' : 'yapmadi'); 
+            row.innerHTML = `<span>${student.name}</span><span>${student.isDone ? '✅' : '❌'}</span>`; 
+            
+            row.onclick = function() {
+                if (appRole === 'board') return;
+                student.isDone = !student.isDone; 
+                
+                let doneCount = 0;
+                record.details.forEach(s => { if(s.isDone) doneCount++; });
+                record.done = doneCount;
+                record.notDone = record.details.length - doneCount;
+                
+                saveToCloud(); 
+                openHistoryModal(recordId); 
+                if(document.getElementById('screen-archive').classList.contains('active')) renderGeneralHistory();
+            };
+            listContainer.appendChild(row); 
+        }
+        document.getElementById('historyModal').classList.add('active');
+    }
+
+    function closeHistoryModal() { document.getElementById('historyModal').classList.remove('active'); currentModalRecordId = null; }
+    function closeModalOnOutsideClick(event) { if (event.target.id === 'historyModal') closeHistoryModal(); }
+
+    function loadPortfolioStudents() {
+        const cls = document.getElementById('portClassSelect').value; const sel = document.getElementById('portStudentSelect'); sel.innerHTML = '<option value="" disabled selected>Öğrenci Seçiniz...</option>';
+        if(cls){ classData[cls].forEach(s=>{ const o=document.createElement('option');o.value=s;o.text=s;sel.appendChild(o);}); sel.disabled=false; }
+    }
+    
+    function renderStudentPortfolio() {
+        const cls = document.getElementById('portClassSelect').value; const stu = document.getElementById('portStudentSelect').value; const container = document.getElementById('portfolioContainer');
+        if(!cls || !stu) { container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px;">Öğrenci seçin.</div>'; return; }
+        let done=0, total=0, mat=0, hHtml='';
+        savedHistories.forEach(r => {
+            if(r.className === cls) {
+                let s = r.details.find(x => x.name === stu);
+                if(s) {
+                    let asgn = r.assignment || "";
+                    if(!asgn.includes('EKSİK')) { total++; if(s.isDone) done++; } else if(!s.isDone) { mat++; }
+                    hHtml += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:0.5px solid rgba(255,255,255,0.1); font-size:14px;"><span>${r.date} - ${linkYakalayici(r.assignment)}</span><span style="color:${s.isDone?'var(--success)':'var(--danger)'}; font-weight:bold;">${s.isDone?'Yaptı':'Eksik'}</span></div>`;
+                }
+            }
+        });
+        
+        let pScore = (participationScores[cls] && participationScores[cls][stu]) ? participationScores[cls][stu] : 0;
+        let rate = total===0 ? 0 : Math.round((done/total)*100); let rCol = getColorForRate(rate);
+        
+        let parentConn = parentConnections.find(p => p.className === cls && p.studentName === stu);
+        let parentInfoHtml = parentConn 
+            ? `<div style="font-size: 15px; color: var(--success); margin-top: 8px; font-weight:500;">👨‍👩‍👧 Bağlı Veli: <b style="color:white;">${parentConn.parentName}</b></div>` 
+            : `<div style="font-size: 14px; color: var(--danger); margin-top: 8px; font-weight:500;">⚠️ Veli Bağlantısı Yok</div>`;
+
+        let streak = calculateStreak(cls, stu);
+        let streakIcon = streak >= 3 ? `<span style="color:var(--warning); font-size:24px; font-weight:bold;" title="${streak} Ödevlik Seri!">${streak}🔥</span>` : '';
+        
+        let pButtons = appRole === 'teacher' ? `<div style="display:flex; justify-content:center; gap:8px; margin-top:8px;"><button style="background:var(--success); color:white; border:none; border-radius:6px; padding:4px 16px; font-weight:bold; cursor:pointer;" onclick="manualGivePoint('${cls}', '${stu}', 1)">+1</button><button style="background:var(--danger); color:white; border:none; border-radius:6px; padding:4px 16px; font-weight:bold; cursor:pointer;" onclick="manualGivePoint('${cls}', '${stu}', -1)">-1</button></div>` : '';
+
+        container.innerHTML = `<div style="text-align:center; margin-bottom:20px;"><div style="font-size:48px;">👤</div><h2 style="margin:5px 0; display: flex; align-items: center; justify-content: center; gap: 8px;">${stu.split(' - ')[1] || stu}${streakIcon}</h2><p style="color:var(--text-muted); margin:0;">${cls}</p>${parentInfoHtml}</div><div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;"><div class="glass-panel" style="margin:0; text-align:center; padding:16px;"><div style="font-size:24px; font-weight:bold; color:${rCol};">${rate}%</div><div style="font-size:12px; color:var(--text-muted);">Ödev Oranı</div></div><div class="glass-panel" style="margin:0; text-align:center; padding:16px;"><div style="font-size:24px; font-weight:bold; color:var(--info);">${pScore}</div><div style="font-size:12px; color:var(--text-muted);">Katılım</div>${pButtons}</div></div><div class="glass-panel" style="border-left: 4px solid var(--danger);"><h3 style="margin-top:0;">⚠️ Materyal Eksikleri: ${mat}</h3></div><div class="glass-panel"><h3 style="margin-top:0;">📝 İşlem Geçmişi</h3>${hHtml||'<div style="color:var(--text-muted); font-size:14px;">Kayıt yok.</div>'}</div>`;
+    }
+
+    function exportToCSV() {
+        const cls = document.getElementById('classPortSelect').value;
+        if(!cls) return alert('Lütfen önce bir sınıf seçin.');
+        
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+        csvContent += "Ögrenci Numarasi ve Adi,Odev Orani (%),Katilim Puani,Eksik Materyal,Sistem Performans Notu\n";
+        
+        let sStats = {}; classData[cls].forEach(s => { sStats[s] = { done:0, total:0, mat:0 }; });
+        
+        savedHistories.forEach(r => {
+            if(r.className === cls) {
+                let asgn = r.assignment || "";
+                r.details.forEach(d => {
+                    if(sStats[d.name]) { 
+                        if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) { 
+                            sStats[d.name].total++; 
+                            if(d.isDone) sStats[d.name].done++; 
+                        } else if(!d.isDone) { sStats[d.name].mat++; } 
+                    }
+                });
+            }
+        });
+
+        Object.keys(sStats).forEach(s => {
+            let st = sStats[s]; 
+            let p = (participationScores[cls] && participationScores[cls][s]) ? participationScores[cls][s] : 0;
+            
+            let baseNote = st.total === 0 ? 100 : Math.round((st.done/st.total)*100);
+            let perfNote = baseNote + (p * 2) - (st.mat * 3);
+            
+            if(perfNote > 100) perfNote = 100;
+            if(perfNote < 0) perfNote = 0;
+            if(st.total === 0 && st.mat === 0 && p === 0) perfNote = "Giris Yok";
+            
+            let rateDisplay = st.total === 0 ? "0" : Math.round((st.done/st.total)*100);
+            csvContent += `"${s}",${rateDisplay},${p},${st.mat},${perfNote}\n`;
+        });
+        
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${cls}_Performans_Raporu.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function renderClassPortfolio() {
+        const cls = document.getElementById('classPortSelect').value; const container = document.getElementById('classPortfolioContainer'); 
+        if(!cls) { container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 24px;">Sınıf seçin.</div>'; return; }
+        
+        let sStats = {}; classData[cls].forEach(s => { sStats[s] = { done:0, total:0, mat:0 }; });
+        let tA = 0, tD = 0;
+
+        savedHistories.forEach(r => {
+            if(r.className === cls) {
+                let asgn = r.assignment || "";
+                r.details.forEach(d => {
+                    if(sStats[d.name]) { 
+                        if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) { sStats[d.name].total++; tA++; if(d.isDone) { sStats[d.name].done++; tD++; } } else if(!d.isDone) { sStats[d.name].mat++; } 
+                    }
+                });
+            }
+        });
+
+        let cRate = tA === 0 ? 0 : Math.round((tD/tA)*100); let cCol = getColorForRate(cRate);
+
+        let html = `<div class="glass-panel" style="text-align:center; padding: 20px; border-left: 4px solid ${cCol}; margin-bottom: 20px;"><div style="font-size: 14px; color: var(--text-muted); margin-bottom: 5px;">Sınıf Genel Ödev Yapma Oranı</div><div style="font-size: 36px; font-weight: bold; color: ${cCol};">%${cRate}</div></div>`;
+
+        html += `<div style="overflow-x:auto;"><table style="width:100%; text-align:left; border-collapse:collapse; font-size:14px;"><tr style="border-bottom:1px solid rgba(255,255,255,0.2);"><th style="padding:12px 8px;">Öğrenci</th><th style="padding:12px 8px;">Ödev Oranı</th><th style="padding:12px 8px;">Katılım</th><th style="padding:12px 8px;">Eksik Mat.</th><th style="padding:12px 8px; color:var(--info);">P. Notu</th></tr>`;
+        Object.keys(sStats).forEach(s => {
+            let st = sStats[s]; let r = st.total===0 ? 0 : Math.round((st.done/st.total)*100); let p = (participationScores[cls] && participationScores[cls][s]) ? participationScores[cls][s] : 0;
+            
+            let baseNote = st.total === 0 ? 100 : Math.round((st.done/st.total)*100);
+            let perfNote = baseNote + (p * 2) - (st.mat * 3);
+            if(perfNote > 100) perfNote = 100;
+            if(perfNote < 0) perfNote = 0;
+            if(st.total === 0 && st.mat === 0 && p === 0) perfNote = "-";
+
+            let parentConn = parentConnections.find(conn => conn.className === cls && conn.studentName === s);
+            let parentIcon = parentConn ? `<span title="Bağlı Veli: ${parentConn.parentName}" style="font-size: 14px; margin-left:5px; cursor:help;"> 👨‍👩‍👧</span>` : '';
+            
+            let streak = calculateStreak(cls, s);
+            let streakIcon = streak >= 3 ? `<span style="color:var(--warning); font-size:14px; font-weight:bold; margin-left:6px;" title="${streak} Seri!">${streak}🔥</span>` : '';
+
+            let inlineButtons = appRole === 'teacher' ? `<div style="display:inline-flex; margin-left:8px;"><button style="background:var(--success); color:white; border:none; border-radius:4px; width:22px; height:22px; line-height:22px; padding:0; text-align:center; font-weight:bold; cursor:pointer; margin-right:4px;" onclick="event.stopPropagation(); manualGivePoint('${cls}', '${s}', 1)">+</button><button style="background:var(--danger); color:white; border:none; border-radius:4px; width:22px; height:22px; line-height:22px; padding:0; text-align:center; font-weight:bold; cursor:pointer;" onclick="event.stopPropagation(); manualGivePoint('${cls}', '${s}', -1)">-</button></div>` : '';
+
+            html += `<tr style="border-bottom:0.5px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="navigateLocal('portfolio'); document.getElementById('portClassSelect').value='${cls}'; loadPortfolioStudents(); document.getElementById('portStudentSelect').value='${s}'; syncBoardData(); renderStudentPortfolio();">
+                <td style="padding:12px 8px; display:flex; align-items:center;">${s.split(' - ')[1] || s}${parentIcon}${streakIcon}</td>
+                <td style="padding:12px 8px; font-weight:bold; color:${getColorForRate(r)};">%${r}</td>
+                <td style="padding:12px 8px; white-space:nowrap;">${p}${inlineButtons}</td>
+                <td style="padding:12px 8px; color:${st.mat>0?'var(--danger)':'var(--text-main)'};">${st.mat}</td>
+                <td style="padding:12px 8px; font-weight:bold; color:var(--info);">${perfNote}</td></tr>`;
+        });
+        html += `</table></div>`; container.innerHTML = html;
+    }
+
+    function updateTimerUI() {
+        if (!timerState.running) { if(appRole === 'board') { document.getElementById('btnTimerStart').style.display = 'block'; document.getElementById('btnTimerPause').style.display = 'none'; } return; }
+        timerState.remaining = timerState.endTime - Date.now();
+        if (timerState.remaining <= 0) { timerState.remaining = 0; timerState.running = false; document.getElementById('timerDisplay').innerText = "00:00"; if(appRole === 'board') { document.getElementById('btnTimerStart').style.display = 'block'; document.getElementById('btnTimerPause').style.display = 'none'; } return; }
+        let sec = Math.floor(timerState.remaining / 1000); let m = Math.floor(sec / 60); let s = sec % 60;
+        document.getElementById('timerDisplay').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+        if(appRole === 'board') { document.getElementById('btnTimerStart').style.display = 'none'; document.getElementById('btnTimerPause').style.display = 'block'; }
+    }
+    function setTimer(m) { timerState.remaining = m * 60000; timerState.running = false; document.getElementById('timerDisplay').innerText = (m < 10 ? "0" + m : m) + ":00"; if(appRole === 'board') saveToCloud(); }
+    function startTimer() { if(timerState.remaining<=0)return; timerState.endTime = Date.now() + timerState.remaining; timerState.running = true; if(appRole === 'board') saveToCloud(); }
+    function pauseTimer() { if(!timerState.running)return; timerState.remaining = timerState.endTime - Date.now(); timerState.running = false; if(appRole === 'board') saveToCloud(); }
+    function resetTimer() { timerState.running = false; timerState.remaining = 300000; document.getElementById('timerDisplay').innerText = "05:00"; if(appRole === 'board') saveToCloud(); }
+
+    function generateGroups() {
+        const cls = document.getElementById('groupClassSelect').value; const gCount = parseInt(document.getElementById('groupCountSelect').value);
+        if(!cls || !gCount) return alert('Sınıf ve grup sayısı seçin.');
+        let students = [...classData[cls]];
+        for (let i = students.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [students[i], students[j]] = [students[j], students[i]]; }
+        let teams = []; for(let i=0; i<gCount; i++) teams.push([]);
+        students.forEach((s, i) => teams[i % gCount].push(s));
+        activeGroups = { className: cls, groupCount: gCount, teams: teams, timestamp: Date.now() }; renderGroups(); saveToCloud();
+    }
+    function renderGroups() {
+        const container = document.getElementById('groupsContainer'); container.innerHTML = '';
+        if (!activeGroups || !activeGroups.teams || activeGroups.teams.length === 0) { container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">Grup yok.</div>'; return; }
+        let html = `<div style="font-size: 14px; margin-bottom:12px; color:var(--primary); font-weight:600; text-align:center;">${activeGroups.className} Sınıfı - ${activeGroups.groupCount} Grup</div><div class="teams-grid">`;
+        activeGroups.teams.forEach((t, i) => { html += `<div class="team-card"><div style="font-weight:bold; margin-bottom:8px; color:var(--info);">Grup ${i+1}</div>`; t.forEach(s => html += `<div class="team-member">${s.split(' - ')[1] || s}</div>`); html += `</div>`; });
+        container.innerHTML = html + `</div>`;
+    }
+
+    function loadRandomClass() {
+        const cls = document.getElementById('randomClassSelect').value; if(!cls) return;
+        document.getElementById('randomActionArea').style.display = 'block'; document.getElementById('randomResult').innerText = "Kimi Seçeceğiz?"; document.getElementById('participationButtons').style.display = 'none';
+        if(!randomPools[cls] || randomPools[cls].length === 0) randomPools[cls] = [...classData[cls]];
+        activeSpin = { className: cls, studentName: '', timestamp: 0 }; 
+        renderRandomPool();
+    }
+    
+    function renderRandomPool() {
+        const cls = document.getElementById('randomClassSelect').value; 
+        const container = document.getElementById('randomPoolList'); 
+        const counterEl = document.getElementById('poolCounterDisplay');
+        container.innerHTML = ''; counterEl.innerHTML = '';
+        
+        if(!cls || !randomPools[cls]) return;
+
+        let allStudents = classData[cls] || [];
+        let remaining = randomPools[cls];
+
+        counterEl.innerText = `Kalan Öğrenci: ${remaining.length} / ${allStudents.length}`;
+
+        allStudents.forEach(s => {
+            let isRemaining = remaining.includes(s);
+            let namePart = s.split(' - ')[1] || s;
+            if (isRemaining) { container.innerHTML += `<div class="pool-item remaining">${namePart}</div>`; } 
+            else { container.innerHTML += `<div class="pool-item picked">${namePart}</div>`; }
+        });
+    }
+
+    function pickRandomStudent() {
+        const cls = document.getElementById('randomClassSelect').value; 
+        if(!cls) return;
+        if(!randomPools[cls]) randomPools[cls] = [...classData[cls]];
+        
+        let remaining = randomPools[cls];
+        let pickedAlready = classData[cls].filter(s => !remaining.includes(s));
+
+        if(remaining.length === 0) { 
+            alert("Sınıftaki tüm öğrenciler seçildi! Liste baştan başlıyor..."); 
+            randomPools[cls] = [...classData[cls]]; 
+            remaining = randomPools[cls];
+            pickedAlready = [];
+        }
+
+        let pickedStudent = "";
+        if (pickedAlready.length > 0 && Math.random() < 0.10) {
+            const rIndex = Math.floor(Math.random() * pickedAlready.length);
+            pickedStudent = pickedAlready[rIndex];
+        } 
+        else {
+            const rIndex = Math.floor(Math.random() * remaining.length);
+            pickedStudent = remaining[rIndex];
+            remaining.splice(rIndex, 1);
+        }
+
+        activeSpin = { className: cls, studentName: pickedStudent, timestamp: Date.now() }; 
+        displaySpinAnimation(activeSpin); 
+        saveToCloud(); 
+    }
+
+    function displaySpinAnimation(spinData) {
+        const res = document.getElementById('randomResult'); res.style.transform = "scale(1.1)"; res.style.color = "var(--text-main)";
+        let t = 0; let c = classData[spinData.className]; if(!c) return;
+        
+        let i = setInterval(()=>{ 
+            res.innerText = c[Math.floor(Math.random()*c.length)].split(' - ')[1]; 
+            
+            if (appRole === 'board') playTick();
+
+            if(t++ > 15){ 
+                clearInterval(i); 
+                let celeb = appRole === 'board' ? " 🎉🎊" : "";
+                res.innerText = "✨ " + spinData.studentName.split(' - ')[1] + celeb; 
+                res.style.transform = "scale(1.2)"; res.style.color = "var(--success)"; 
+                
+                if (appRole === 'board') {
+                    playWinSound();
+                    if (typeof confetti === "function") {
+                        confetti({particleCount: 150, spread: 80, origin: {y: 0.6}});
+                    }
+                }
+                
+                if(document.getElementById('screen-tools').classList.contains('active')) { 
+                    if(appRole === 'teacher') document.getElementById('participationButtons').style.display = 'flex'; 
+                    renderRandomPool(); 
+                }
+            } 
+        }, 80);
+    }
+    
+    function resetRandomPool() { 
+        const cls = document.getElementById('randomClassSelect').value; 
+        if(cls){ 
+            if(confirm('Havuzu tamamen sıfırlamak istediğinize emin misiniz?')) {
+                randomPools[cls] = [...classData[cls]]; 
+                activeSpin = { className: cls, studentName: '', timestamp: Date.now() }; 
+                document.getElementById('randomResult').innerText = "Kimi Seçeceğiz?"; 
+                document.getElementById('participationButtons').style.display = 'none'; 
+                renderRandomPool(); 
+                saveToCloud(); 
+            }
+        } 
+    }
+    
+    function giveParticipationPoint(p) {
+        const cls = document.getElementById('randomClassSelect').value; const sName = activeSpin.studentName; if(!cls || !sName) return;
+        if(!participationScores[cls]) participationScores[cls] = {}; participationScores[cls][sName] = (participationScores[cls][sName] || 0) + p;
+        document.getElementById('participationButtons').style.display = 'none'; saveToCloud();
+        sendPushNotification(cls); 
+    }
+</script>
+</body>
+</html>

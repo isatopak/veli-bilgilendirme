@@ -121,11 +121,29 @@
     // --- LİNK YAKALAYICI MODÜL ---
     function linkYakalayici(metin) {
         if (!metin) return "";
-        // Sadece URL'leri bulur ve HTML butonuna çevirir
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return metin.replace(urlRegex, function(url) {
             return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;" onclick="event.stopPropagation();">Tıkla ve Git 🔗</a>';
         });
+    }
+
+    // --- ALEV SERİSİ HESAPLAYICI ---
+    function calculateStreak(className, studentName) {
+        let streak = 0;
+        for(let i=0; i<savedHistories.length; i++) {
+            let r = savedHistories[i];
+            if(r.className === className) {
+                let asgn = r.assignment || "";
+                if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) {
+                    let s = r.details.find(x => x.name === studentName);
+                    if(s) {
+                        if(s.isDone) streak++;
+                        else break;
+                    }
+                }
+            }
+        }
+        return streak;
     }
 
     window.onload = function() { checkParentStatus(); };
@@ -167,24 +185,20 @@
         if(!pName) return alert("Lütfen veli adını ve soyadını girin!");
 
         if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrencinin verilerini okumak için kilitlenecektir. Onaylıyor musunuz?")) {
-            
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             db.ref('odevData/parentConnections').once('value').then((snapshot) => {
                 let connections = snapshot.val() || [];
                 let exists = connections.find(c => c.className === cls && c.studentName === stu && c.parentName === pName);
-                
                 if (!exists) {
                     connections.push({className: cls, studentName: stu, parentName: pName, date: new Date().toLocaleDateString('tr-TR')});
                     db.ref('odevData/parentConnections').set(connections);
                 }
-
                 setTimeout(function() { 
                     document.getElementById('loadingOverlay').style.display = 'none';
                     localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
                     checkParentStatus();
                 }, 1500);
-                
             }).catch(err => {
                 alert("Bağlantı hatası! Lütfen internetinizi kontrol edin.");
                 document.getElementById('loadingOverlay').style.display = 'none';
@@ -223,7 +237,7 @@
                 if (studentDetail) {
                     let asgRaw = record.assignment || "";
                     let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL");
-                    let asg = linkYakalayici(asgRaw); // Linkler butona dönüşür
+                    let asg = linkYakalayici(asgRaw); 
                     
                     if(!isMaterial) { total++; if (studentDetail.isDone) doneCount++; } 
                     else if (!studentDetail.isDone) { matIssues++; }
@@ -249,7 +263,6 @@
                 let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
                 let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                // Burada da linkleri butona dönüştürüyoruz
                 pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-class">${p.className}</div><div class="box-title">${linkYakalayici(p.assignment)}</div></div>`;
             }
         });
@@ -258,12 +271,16 @@
         let pendingSection = pendingCount > 0 ? `<div class='framed-heading' style='margin-top:24px;'><span>📌 Ödev Hatırlatıcı</span></div>${pendingHtml}` : "";
         const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
 
+        // Veli Ekranında Alev Serisi Gösterimi
+        let streak = calculateStreak(className, studentName);
+        let streakIcon = streak >= 3 ? `<span style="color:var(--warning); font-size:24px; font-weight:bold; margin-left:8px;" title="${streak} Ödevlik Seri!">${streak}🔥</span>` : '';
+
         if (total === 0 && pendingCount === 0 && matIssues === 0) { 
-            container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
+            container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
         } else {
             const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); const rateColor = getColorForRate(rate);
             let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
-            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px;">${cleanName}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div><div class='glass-panel' style='text-align: center; margin-bottom: 24px; border-left: 4px solid ${rateColor};'><div style='font-size: 48px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div><div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div></div>${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
+            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div><div class='glass-panel' style='text-align: center; margin-bottom: 24px; border-left: 4px solid ${rateColor};'><div style='font-size: 48px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div><div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div></div>${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
         }
     }
 </script>

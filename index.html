@@ -107,6 +107,7 @@
     const dbRef = db.ref('odevData');
 
     let savedHistories = []; let pendingAssignments = [];
+    let participationScores = {}; // YENİ: Katılım puanlarını tutacak değişken
 
     const classData = {
         "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
@@ -216,6 +217,8 @@
                 var data = snapshot.val();
                 savedHistories = data.history || []; 
                 pendingAssignments = data.pending || []; 
+                participationScores = data.scores || {}; // YENİ: Firebase'den puanlar çekiliyor
+                
                 if (document.getElementById('screen-parent-dashboard').classList.contains('active')) {
                     renderParentDashboard(); 
                 }
@@ -275,12 +278,30 @@
         let streak = calculateStreak(className, studentName);
         let streakIcon = streak >= 3 ? `<span style="color:var(--warning); font-size:24px; font-weight:bold; margin-left:8px;" title="${streak} Ödevlik Seri!">${streak}🔥</span>` : '';
 
-        if (total === 0 && pendingCount === 0 && matIssues === 0) { 
+        // YENİ: Katılım Puanını çekiyoruz
+        let pScore = (participationScores[className] && participationScores[className][studentName]) ? participationScores[className][studentName] : 0;
+        let scoreColor = pScore > 0 ? 'var(--success)' : (pScore < 0 ? 'var(--danger)' : 'var(--info)');
+
+        if (total === 0 && pendingCount === 0 && matIssues === 0 && pScore === 0) { 
             container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
         } else {
             const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); const rateColor = getColorForRate(rate);
             let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
-            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div><div class='glass-panel' style='text-align: center; margin-bottom: 24px; border-left: 4px solid ${rateColor};'><div style='font-size: 48px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div><div style='font-size: 15px; color: var(--text-muted);'>Görev Tamamlama Oranı</div></div>${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
+            
+            // YENİ: Veli paneline de Öğrenci Portfolyosundaki gibi 2 sütunlu İstatistik Paneli eklendi
+            let statsHtml = `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
+                <div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${rateColor};'>
+                    <div style='font-size: 36px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div>
+                    <div style='font-size: 13px; color: var(--text-muted);'>Ödev Oranı</div>
+                </div>
+                <div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${scoreColor};'>
+                    <div style='font-size: 36px; font-weight: 700; color: ${scoreColor}; margin-bottom: 4px;'>${pScore > 0 ? '+'+pScore : pScore}</div>
+                    <div style='font-size: 13px; color: var(--text-muted);'>Katılım Puanı</div>
+                </div>
+            </div>`;
+
+            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div>${statsHtml}${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
         }
     }
 </script>

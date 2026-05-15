@@ -13,7 +13,7 @@
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({ 
+        await OneSignal.init({
           appId: "bf09fc9c-611b-49ab-8ec6-6c154d450d1c",
           safari_web_id: "web.onesignal.auto.0b3c1e09-f01e-4f75-a6ff-3f857f927766",
           notifyButton: {
@@ -34,224 +34,17 @@
         });
       });
     </script>
+    ```
 
-    <style>
-        :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; }
-        .app-header { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(10px); padding: 18px; text-align: center; font-weight: 600; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
-        .container { padding: 16px; }
-        .glass-panel { background: var(--surface); border-radius: 18px; padding: 24px; margin-bottom: 16px; text-align: center; }
-        input, select { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--surface-variant); color: #fff; margin-bottom: 16px; outline: none; }
-        .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; background: var(--primary); color: #fff; font-weight: 600; }
-        .logout-btn { position: absolute; right: 16px; font-size: 11px; font-weight: 700; background: rgba(255, 69, 58, 0.2); color: var(--danger); padding: 6px 12px; border-radius: 100px; border: 0.5px solid rgba(255, 69, 58, 0.4); cursor: pointer; text-transform: uppercase; }
-        #syncStatus { position: absolute; left: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; display:none; }
-        .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-        .history-card { background: var(--surface-variant); padding: 16px; border-radius: 14px; border-left: 4px solid var(--primary); margin-bottom: 12px; }
-        .assignment-box { padding: 16px; border-radius: 18px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); display: flex; flex-direction: column;}
-        .box-red { background: linear-gradient(135deg, #FF453A, #FF375F); color: #FFF; }
-        .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
-        .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; justify-content: space-between; align-items: center;}
-        .box-class { font-size: 32px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -1px;}
-        .box-title { font-size: 14px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word;}
-        .framed-heading { background: var(--surface-variant); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; color: var(--text-main); font-weight: 600; font-size: 16px; }
-    </style>
-</head>
-<body>
+### 3. "Site Not Found" Hatasını Bitir
+Sekmelerde gördüğüm o hatayı aşmak için öğretmen panelini şu adresten açmalısın:
+`https://isatopak.github.io/odevtakip/odev_takip.html`
 
-    <div id="mainApp">
-        <div class="app-header">
-            <span id="syncStatus"></span>
-            Veli Bilgilendirme Paneli
-            <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">🔄 Bağlantıyı Kes</button>
-        </div>
-        <div class="container" id="parentContent">
-            
-            <div id="screen-parent-setup" style="display:none;">
-                <div class="glass-panel" style="text-align:center; padding: 30px 20px; margin-top:20px;">
-                    <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:16px;">
-                        <div style="font-size: 56px;">👨‍👩‍👧</div><div style="font-size: 24px; color: var(--text-muted);">🔗</div><div style="font-size: 56px;">👤</div>
-                    </div>
-                    <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli Cihaz Eşleştirme</h2>
-                    <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Öğrenciyi seçin ve kendi adınızı girin. Bu cihaz seçilen öğrenci için kilitlenecektir.</p>
-                    
-                    <div style="margin-bottom: 16px;"><select id="parentSetupClass" onchange="loadParentSetupStudents()"><option value="" disabled selected>Öğrencinin Sınıfı...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option></select></div>
-                    <div style="margin-bottom: 16px;"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
-                    <div style="margin-bottom: 20px;"><input type="text" id="parentNameInput" placeholder="Veli Adı ve Soyadı" style="border: 1px solid var(--info);"></div>
-                    <button class="btn-primary" onclick="saveParentSetup()" style="margin-top:24px;">✅ Kaydet ve Bağlan</button>
-                </div>
-            </div>
+### Özetle Şimdi Ne Yapıyoruz?
+1.  OneSignal'daki **Site URL**'yi `https://isatopak.github.io/odevtakip/` olarak düzeltip kaydet.
+2.  GitHub'daki **index.html** dosyanı yukarıdaki `safari_web_id` eklenmiş haliyle güncelle.
+3.  GitHub Pages ekranında sitenin **"Live"** (Canlı) olduğundan emin ol (Yeşil kutucuk çıkana kadar bekle).
+4.  Kendi telefonundan o linke gir, **Zil** ikonuna bas ve "İzin Ver" de.
+5.  Öğretmen panelinden "TEST" sınıfına bir puan gir ve OneSignal **Messages -> Push** listesini kontrol et.
 
-            <div id="screen-parent-dashboard" style="display:none;"><div id="parentDashboardContainer"></div></div>
-
-        </div>
-    </div>
-
-<script>
-    window.onload = function() { checkParentStatus(); };
-
-    const firebaseConfig = { apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc", authDomain: "odevtakipsistemi-b9fff.firebaseapp.com", databaseURL: "https://odevtakipsistemi-b9fff-default-rtdb.europe-west1.firebasedatabase.app", projectId: "odevtakipsistemi-b9fff", storageBucket: "odevtakipsistemi-b9fff.firebasestorage.app", messagingSenderId: "354499388490", appId: "1:354499388490:web:b2a53dba1dc8d5c20732b3" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database(); const dbRef = db.ref('odevData');
-
-    let savedHistories = []; let pendingAssignments = []; let participationScores = {};
-
-    const classData = {
-        "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
-        "5C": ["36 - Ada Temoçin", "88 - Badenur Kaya", "128 - Buğlem Altındaş", "135 - Defne Aktaş", "198 - Gamzenur Yıldız", "224 - Kerem Talha Akyıldız", "246 - Mehmet Timur Yalçın", "262 - Miraç Ege Taşhan", "263 - Miran Durma", "265 - Muhammed Arif Kavaklı", "307 - Solin Rohiv Görür", "344 - Ömer Kayra Mutlu", "355 - Timur Ula", "373 - Seyit Ali Şahin", "413 - Zeynep Cansu Bekdemir", "419 - Azra Geliç", "425 - Berk Emir Arıkan", "438 - Ecrin Ercan", "439 - Edip Yusuf Aydemir", "477 - Mira Su Ürentürk", "487 - Nazlı Ula", "488 - Nehir Armağan Bayır", "492 - Poyraz Ayçetin", "495 - Ramazan İsot", "499 - Semih Şentürk", "501 - Umut Yavaş", "508 - Zeynep Nisa Arancı"],
-        "5D": ["87 - Ayşegül Altunyuva", "116 - Berat Kurubal", "118 - Belinay Sarıbulak", "137 - Derin Mebrule Alper", "187 - Eyüp Arda Karabulut", "222 - Furkan Yakupoğlu", "274 - Resul Güven", "289 - Nazlı Çevik", "291 - Kaan Efe Keten", "360 - Elif Kocaman", "376 - Yusuf Buğra Demirci", "390 - Adanaz Gezer", "414 - Asrın Kurşun", "417 - Ayaz Aksoy", "434 - Devran Çetin", "440 - Ege Özel", "464 - Hümeyra Nas Baloğlu", "466 - Tuana Dundar", "490 - Osman Meral", "493 - Poyraz Karamuk", "498 - Rumeysa Akdemir", "504 - Yağmur Hilal Geçmez", "507 - Zehra Şenses", "541 - Çağrı Karapınar", "543 - Gönül Keleş"],
-        "5E": ["52 - Afşin Kuruca", "142 - Ela Nur Yıldız", "159 - Elif İlhan", "165 - Erva Acar", "169 - Eslimnur Kaya", "170 - Esma Çakal", "175 - Turgut Kaplan", "179 - Hira Elif Kartal", "201 - Hasan Etem Kurubal", "210 - Hira Sena Üzel", "269 - Muhammed Miraç Şirin", "278 - Murat Yıldız", "286 - Nasuh Buğra Yılmaz", "299 - Özgün Ada Erol", "313 - Muhammed Eymen Aslan", "319 - Ömer Sefa Gündüz", "328 - Elif Naz Gedik", "333 - Eda Nil Gedik", "357 - Eylül Çalışkan", "388 - Tuğçe Karakaya", "395 - Muhammet Talha Örün", "408 - Ali Kemal Aydoğdu", "421 - Selim Yıldırım", "448 - Elifnaz Akgül", "449 - Talha Karaca", "469 - Kaan Demir", "489 - Neslihan İşcan", "513 - Taha Tatay"],
-        "5YDA": ["124 - Berkay Karagöz", "189 - Çınar Ali Demir", "209 - Sevgi Şener", "433 - Derin Somer", "451 - Emir Diler", "216 - Hüseyin Metin Ünlü", "292 - Ömer Toprak Kurubal", "363 - Hüseyin Kayra Demir", "415 - Asya Gökmen", "428 - Buğra Çınar", "475 - Melinay Perçin", "246 - Mehmet Timur Yalçın", "373 - Seyit Ali Şahin", "499 - Semih Şentürk", "501 - Umut Yavaş", "116 - Berat Kurubal", "414 - Asrın Kurşun", "440 - Ege Özel", "466 - Tuana Dündar", "170 - Esma Çakal", "408 - Ali Kemal Aydoğdu", "59 - Ahsen Ece Özbek", "75 - Almira Aydın", "111 - Bengü Kılıç", "153 - Elif İkra Bektaş", "202 - Hilal Erva Kurubal", "312 - Efecan Halitoğulları", "410 - Zehra Karabulut", "422 - Beren Dere", "494 - Poyraz Kartal"],
-        "6A": ["2 - Ahmet Ayaz Altıntaş", "4 - Ahmet Dere", "5 - Anıl Ergin Aksoy", "11 - Ayaz Nergiz", "14 - Can Karakaya", "17 - Çınar Yüce", "30 - Derin Eren", "35 - Dilara Aydın", "48 - Ela Nur Özbek", "62 - Ezgi Özenses", "63 - Nas Maya Kurubal", "70 - Rüzgar Can", "73 - Saliha Uysal", "84 - Selen Özdemir", "91 - Umut Bozkurt", "93 - Yiğit Er", "94 - Yusuf Hamza Özbek", "96 - Zeynep Balta", "102 - Zeynep Kalender", "105 - İlkim Nehir Tepe", "107 - Ekin Fırat Koç", "109 - Serin Üzel", "125 - Rüzgar İnan Şık", "126 - Nisa Yağmur Ülker", "127 - Eslem Nisa Altındaş", "140 - Ata Can Özdemir", "147 - Sare Karabulut", "238 - Elif Bahar Ceylan", "370 - Solin Deniz Koçin", "389 - Yusuf Uras Kılıç"],
-        "7E": ["34 - Arin Eray Erdoğan", "53 - Mert Ali Balta", "60 - Beyza Gül Kalyon", "69 - Ahmet Ediz Arısoy", "101 - Asenat Aras", "112 - Barış Kazankaya", "161 - Hayrunnisa Toraman", "230 - Muhammed Mahmudov", "247 - Eda Ece Balyemez", "284 - Hafsa Öçal", "340 - Sinem Gül", "341 - Sudenaz Gürsoy", "342 - Sümeyye Kadem Işık", "345 - Tuana Şahin", "348 - Yağız Kaya", "364 - Yusuf Kuzey Özdemir", "365 - Yusuf Özkan Koç", "368 - Tolgahan Paslı", "409 - Efe Mesut Yıldırım", "441 - Dila Taşdemir", "693 - Mustafa Özgür Kütük", "884 - Fadime Eldemir"],
-        "TEST": ["999 - Test Öğrencisi"]
-    };
-
-    function linkYakalayici(metin) {
-        if (!metin) return "";
-        var urlRegex = /(https?:\/\/[^\s]+)/g;
-        return metin.replace(urlRegex, function(url) {
-            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;" onclick="event.stopPropagation();">Tıkla ve Git 🔗</a>';
-        });
-    }
-
-    function calculateStreak(className, studentName) {
-        let streak = 0;
-        for(let i=0; i<savedHistories.length; i++) {
-            let r = savedHistories[i];
-            if(r.className === className) {
-                let asgn = r.assignment || "";
-                if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) {
-                    let s = r.details.find(x => x.name === studentName);
-                    if(s) { if(s.isDone) streak++; else break; }
-                }
-            }
-        } return streak;
-    }
-
-    function checkParentStatus() {
-        let pData = localStorage.getItem('parentStudent');
-        if (pData) { 
-            pData = JSON.parse(pData);
-            
-            // ONESIGNAL ETİKETLEME - Hangi sınıfa kayıtlı olduğunu OneSignal'a bildir
-            window.OneSignalDeferred.push(function(OneSignal) {
-                OneSignal.User.addTag("className", pData.className);
-            });
-
-            document.getElementById('screen-parent-setup').style.display = 'none'; 
-            document.getElementById('screen-parent-dashboard').style.display = 'block'; 
-            document.getElementById('logoutBtn').style.display = 'block';
-            startSync(); 
-        } 
-        else { 
-            document.getElementById('screen-parent-setup').style.display = 'block'; 
-            document.getElementById('screen-parent-dashboard').style.display = 'none'; 
-            document.getElementById('syncStatus').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'none';
-        }
-    }
-
-    function logoutParent() {
-        if(confirm("Bağlantıyı kesmek ve bilgilerinizi yeniden girmek istiyor musunuz?")) {
-            localStorage.removeItem('parentStudent'); location.reload();
-        }
-    }
-
-    function loadParentSetupStudents() {
-        const cls = document.getElementById('parentSetupClass').value; const stuSelect = document.getElementById('parentSetupStudent'); stuSelect.innerHTML = '<option value="" disabled selected>Öğrenci Seçiniz...</option>';
-        if(cls) { classData[cls].forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.text = s; stuSelect.appendChild(opt); }); stuSelect.disabled = false; }
-    }
-    
-    function saveParentSetup() {
-        const cls = document.getElementById('parentSetupClass').value; const stu = document.getElementById('parentSetupStudent').value; const pName = document.getElementById('parentNameInput').value.trim();
-        if(!cls || !stu) return alert("Lütfen sınıf ve öğrenci seçin!"); if(!pName) return alert("Lütfen veli adını ve soyadını girin!");
-
-        if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrencinin verilerini okumak için kilitlenecektir. Onaylıyor musunuz?")) {
-            db.ref('odevData/parentConnections').once('value').then((snapshot) => {
-                let connections = snapshot.val() || [];
-                let exists = connections.find(c => c.className === cls && c.studentName === stu && c.parentName === pName);
-                if (!exists) { connections.push({className: cls, studentName: stu, parentName: pName, date: new Date().toLocaleDateString('tr-TR')}); db.ref('odevData/parentConnections').set(connections); }
-                localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
-                checkParentStatus();
-            }).catch(err => alert("Bağlantı hatası!"));
-        }
-    }
-
-    function startSync() { 
-        document.getElementById('syncStatus').style.display = 'inline-block';
-        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı'; 
-        
-        dbRef.on('value', (snapshot) => {
-            if (snapshot.exists()) {
-                var data = snapshot.val();
-                savedHistories = data.history || []; pendingAssignments = data.pending || []; participationScores = data.scores || {}; 
-                if (document.getElementById('screen-parent-dashboard').style.display === 'block') { renderParentDashboard(); }
-            }
-        });
-    }
-
-    function getColorForRate(rate) { return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)'; }
-
-    function renderParentDashboard() {
-        let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
-        const className = pData.className; const studentName = pData.studentName; const container = document.getElementById('parentDashboardContainer');
-        
-        let html = ''; let total = 0; let doneCount = 0; let matIssues = 0;
-
-        for(let i=0; i<savedHistories.length; i++) {
-            const record = savedHistories[i];
-            if(record.className === className) {
-                let studentDetail = record.details.find(s => s.name === studentName);
-                if (studentDetail) {
-                    let asgRaw = record.assignment || ""; let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL"); let asg = linkYakalayici(asgRaw); 
-                    if(!isMaterial) { total++; if (studentDetail.isDone) doneCount++; } else if (!studentDetail.isDone) { matIssues++; }
-                    
-                    if (isMaterial && !studentDetail.isDone) {
-                        html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${asg}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
-                    } else if (!isMaterial) {
-                        const borderColor = studentDetail.isDone ? 'var(--success)' : 'var(--danger)'; const icon = studentDetail.isDone ? '✅' : '❌';
-                        html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${asg}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
-                    }
-                }
-            }
-        }
-
-        const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-        let pendingHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">';
-        let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
-        
-        sortedPending.forEach(p => {
-            if (p.className === className) {
-                pendingCount++;
-                let isTodayOrPast = p.dueDate <= todayStr; let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow'; let icon = isTodayOrPast ? '🚨' : '⏳';
-                let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-class">${p.className}</div><div class="box-title">${linkYakalayici(p.assignment)}</div></div>`;
-            }
-        });
-        pendingHtml += '</div>';
-        
-        let pendingSection = pendingCount > 0 ? `<div class='framed-heading' style='margin-top:24px;'><span>📌 Ödev Hatırlatıcı</span></div>${pendingHtml}` : "";
-        const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
-
-        let streak = calculateStreak(className, studentName);
-        let streakIcon = streak >= 3 ? `<span style="color:var(--warning); font-size:24px; font-weight:bold; margin-left:8px;" title="${streak} Ödevlik Seri!">${streak}🔥</span>` : '';
-
-        let pScore = (participationScores[className] && participationScores[className][studentName]) ? participationScores[className][studentName] : 0;
-        let scoreColor = pScore > 0 ? 'var(--success)' : (pScore < 0 ? 'var(--danger)' : 'var(--info)');
-
-        if (total === 0 && pendingCount === 0 && matIssues === 0 && pScore === 0) { 
-            container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
-        } else {
-            const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); const rateColor = getColorForRate(rate);
-            let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
-            
-            let statsHtml = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;"><div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${rateColor};'><div style='font-size: 36px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div><div style='font-size: 13px; color: var(--text-muted);'>Ödev Oranı</div></div><div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${scoreColor};'><div style='font-size: 36px; font-weight: 700; color: ${scoreColor}; margin-bottom: 4px;'>${pScore > 0 ? '+'+pScore : pScore}</div><div style='font-size: 13px; color: var(--text-muted);'>Katılım Puanı</div></div></div>`;
-
-            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div>${statsHtml}${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
-        }
-    }
-</script>
-</body>
-</html>
+Bu sefer o 15:30 mesajı listeye düşecek! Deneyip sonucu yazar mısın hocam?

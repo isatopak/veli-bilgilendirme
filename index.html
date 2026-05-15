@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Veli Bilgilendirme Sistemi</title>
-    
+    <title>Veli Bilgilendirme Sistemi - LİSANSLI</title>
+
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -13,8 +13,9 @@
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
+        await OneSignal.init({ 
           appId: "bf09fc9c-611b-49ab-8ec6-6c154d450d1c",
+          safari_web_id: "web.onesignal.auto.0b3c1e09-f01e-4f75-a6ff-3f857f927766",
           notifyButton: {
             enable: true,
             text: {
@@ -36,103 +37,92 @@
 
     <style>
         :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
-        
-        .app-header { background-color: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--text-main); padding: 18px 20px; font-size: 18px; font-weight: 600; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; border-bottom: 0.5px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
-        
+        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; }
+        .app-header { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(10px); padding: 18px; text-align: center; font-weight: 600; border-bottom: 0.5px solid rgba(255,255,255,0.1); }
+        .container { padding: 16px; }
+        .glass-panel { background: var(--surface); border-radius: 18px; padding: 24px; margin-bottom: 16px; text-align: center; }
+        input, select { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--surface-variant); color: #fff; margin-bottom: 16px; outline: none; }
+        .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; background: var(--primary); color: #fff; font-weight: 600; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #000; z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
         .logout-btn { position: absolute; right: 16px; font-size: 11px; font-weight: 700; background: rgba(255, 69, 58, 0.2); color: var(--danger); padding: 6px 12px; border-radius: 100px; border: 0.5px solid rgba(255, 69, 58, 0.4); cursor: pointer; text-transform: uppercase; }
-        
         #syncStatus { position: absolute; left: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; display:none; }
         .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-        
-        .container { padding: 0 16px 40px 16px; }
-        .screen { display: none; animation: fadeIn 0.3s; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .glass-panel { background-color: var(--surface); border-radius: 18px; padding: 24px; margin-bottom: 16px; }
-        .framed-heading { background: var(--surface-variant); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; color: var(--text-main); font-weight: 600; font-size: 16px; }
-        
-        .form-group { margin-bottom: 16px; text-align: left; }
-        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); }
-        select, input { width: 100%; padding: 14px 16px; border: none; border-radius: 12px; font-size: 16px; background-color: var(--surface-variant); color: var(--text-main); appearance: none; outline: none;}
-        select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
-        .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); outline: none;}
-        
         .history-card { background: var(--surface-variant); padding: 16px; border-radius: 14px; border-left: 4px solid var(--primary); margin-bottom: 12px; }
-
         .assignment-box { padding: 16px; border-radius: 18px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); display: flex; flex-direction: column;}
         .box-red { background: linear-gradient(135deg, #FF453A, #FF375F); color: #FFF; }
         .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
         .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; justify-content: space-between; align-items: center;}
         .box-class { font-size: 32px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -1px;}
         .box-title { font-size: 14px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word;}
-
-        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; flex-direction: column; }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--primary); animation: spin 1s linear infinite; margin-bottom: 16px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .framed-heading { background: var(--surface-variant); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; color: var(--text-main); font-weight: 600; font-size: 16px; }
     </style>
 </head>
 <body>
-    <div class="app-header">
-        <span id="syncStatus"></span>
-        <span id="headerTitle">Veli Bilgilendirme</span>
-        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">🔄 Yeniden Bağlan</button>
-    </div>
 
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <div style="font-weight: 600; font-size: 16px;">Sisteme Kaydediliyor...</div>
-    </div>
-
-    <div class="container">
-        <div id="screen-parent-setup" class="screen active">
-            <div class="glass-panel" style="text-align:center; padding: 30px 20px; margin-top:20px;">
-                <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:16px;">
-                    <div style="font-size: 56px;">👨‍👩‍👧</div><div style="font-size: 24px; color: var(--text-muted);">🔗</div><div style="font-size: 56px;">👤</div>
-                </div>
-                <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli Cihaz Eşleştirme</h2>
-                <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Öğrenciyi seçin ve kendi adınızı girin. Bu cihaz seçilen öğrenci için kilitlenecektir.</p>
-                
-                <div class="form-group">
-                    <select id="parentSetupClass" onchange="loadParentSetupStudents()">
-                        <option value="" disabled selected>Öğrencinin Sınıfı...</option>
-                        <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
-                    </select>
-                </div>
-                <div class="form-group"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
-                
-                <div class="form-group" style="margin-top: 20px;">
-                    <input type="text" id="parentNameInput" placeholder="Veli Adı ve Soyadı" style="border: 1px solid var(--info);">
-                </div>
-
-                <button class="btn-primary" onclick="saveParentSetup()" style="margin-top:24px;">✅ Kaydet ve Bağlan</button>
-            </div>
+    <div id="licenseModal" class="modal-overlay active">
+        <div class="glass-panel" style="width: 90%;">
+            <div style="font-size: 48px;">🔐</div>
+            <h2>Sistem Kilitli</h2>
+            <p style="color: var(--text-muted);">Devam etmek için okuldan verilen anahtarı giriniz.</p>
+            <input type="password" id="licenseKeyInput" placeholder="Lisans Anahtarı..." style="text-align: center;">
+            <button class="btn-primary" onclick="checkLicense()">Sistemi Aç</button>
         </div>
+    </div>
 
-        <div id="screen-parent-dashboard" class="screen"><div id="parentDashboardContainer"></div></div>
+    <div id="mainApp" style="display: none;">
+        <div class="app-header">
+            <span id="syncStatus"></span>
+            Veli Bilgilendirme Paneli
+            <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">🔄 Bağlantıyı Kes</button>
+        </div>
+        <div class="container" id="parentContent">
+            
+            <div id="screen-parent-setup" style="display:block;">
+                <div class="glass-panel" style="text-align:center; padding: 30px 20px; margin-top:20px;">
+                    <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:16px;">
+                        <div style="font-size: 56px;">👨‍👩‍👧</div><div style="font-size: 24px; color: var(--text-muted);">🔗</div><div style="font-size: 56px;">👤</div>
+                    </div>
+                    <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli Cihaz Eşleştirme</h2>
+                    <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Öğrenciyi seçin ve kendi adınızı girin. Bu cihaz seçilen öğrenci için kilitlenecektir.</p>
+                    
+                    <div style="margin-bottom: 16px;"><select id="parentSetupClass" onchange="loadParentSetupStudents()"><option value="" disabled selected>Öğrencinin Sınıfı...</option><option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option></select></div>
+                    <div style="margin-bottom: 16px;"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
+                    <div style="margin-bottom: 20px;"><input type="text" id="parentNameInput" placeholder="Veli Adı ve Soyadı" style="border: 1px solid var(--info);"></div>
+                    <button class="btn-primary" onclick="saveParentSetup()" style="margin-top:24px;">✅ Kaydet ve Bağlan</button>
+                </div>
+            </div>
+
+            <div id="screen-parent-dashboard" style="display:none;"><div id="parentDashboardContainer"></div></div>
+
+        </div>
     </div>
 
 <script>
-    // --- FIREBASE BAĞLANTISI ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc",
-      authDomain: "odevtakipsistemi-b9fff.firebaseapp.com",
-      databaseURL: "https://odevtakipsistemi-b9fff-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "odevtakipsistemi-b9fff",
-      storageBucket: "odevtakipsistemi-b9fff.firebasestorage.app",
-      messagingSenderId: "354499388490",
-      appId: "1:354499388490:web:b2a53dba1dc8d5c20732b3"
+    const GIZLI_LISANS_KODU = "Esenkent2026";
+
+    function checkLicense() {
+        if(document.getElementById('licenseKeyInput').value === GIZLI_LISANS_KODU) {
+            localStorage.setItem('isa_license', 'active');
+            location.reload();
+        } else { alert("Hatalı Kod!"); }
+    }
+
+    window.onload = function() {
+        if(localStorage.getItem('isa_license') === 'active') {
+            document.getElementById('licenseModal').classList.remove('active');
+            document.getElementById('mainApp').style.display = 'block';
+            checkParentStatus();
+        }
     };
 
+    const firebaseConfig = { apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc", authDomain: "odevtakipsistemi-b9fff.firebaseapp.com", databaseURL: "https://odevtakipsistemi-b9fff-default-rtdb.europe-west1.firebasedatabase.app", projectId: "odevtakipsistemi-b9fff", storageBucket: "odevtakipsistemi-b9fff.firebasestorage.app", messagingSenderId: "354499388490", appId: "1:354499388490:web:b2a53dba1dc8d5c20732b3" };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const dbRef = db.ref('odevData');
+    const db = firebase.database(); const dbRef = db.ref('odevData');
 
-    let savedHistories = []; let pendingAssignments = [];
-    let participationScores = {}; 
+    let savedHistories = []; let pendingAssignments = []; let participationScores = {};
 
     const classData = {
         "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
@@ -161,36 +151,30 @@
                 let asgn = r.assignment || "";
                 if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) {
                     let s = r.details.find(x => x.name === studentName);
-                    if(s) {
-                        if(s.isDone) streak++;
-                        else break;
-                    }
+                    if(s) { if(s.isDone) streak++; else break; }
                 }
             }
-        }
-        return streak;
+        } return streak;
     }
-
-    window.onload = function() { checkParentStatus(); };
 
     function checkParentStatus() {
         let pData = localStorage.getItem('parentStudent');
         if (pData) { 
             pData = JSON.parse(pData);
             
-            // YENİ: OneSignal Cihazını Sınıf adıyla Etiketle
+            // ONESIGNAL ETİKETLEME - Hangi sınıfa kayıtlı olduğunu OneSignal'a bildir
             window.OneSignalDeferred.push(function(OneSignal) {
                 OneSignal.User.addTag("className", pData.className);
             });
 
-            document.getElementById('screen-parent-setup').classList.remove('active'); 
-            document.getElementById('screen-parent-dashboard').classList.add('active'); 
+            document.getElementById('screen-parent-setup').style.display = 'none'; 
+            document.getElementById('screen-parent-dashboard').style.display = 'block'; 
             document.getElementById('logoutBtn').style.display = 'block';
             startSync(); 
         } 
         else { 
-            document.getElementById('screen-parent-setup').classList.add('active'); 
-            document.getElementById('screen-parent-dashboard').classList.remove('active'); 
+            document.getElementById('screen-parent-setup').style.display = 'block'; 
+            document.getElementById('screen-parent-dashboard').style.display = 'none'; 
             document.getElementById('syncStatus').style.display = 'none';
             document.getElementById('logoutBtn').style.display = 'none';
         }
@@ -198,8 +182,7 @@
 
     function logoutParent() {
         if(confirm("Bağlantıyı kesmek ve bilgilerinizi yeniden girmek istiyor musunuz?")) {
-            localStorage.removeItem('parentStudent');
-            location.reload();
+            localStorage.removeItem('parentStudent'); location.reload();
         }
     }
 
@@ -209,32 +192,17 @@
     }
     
     function saveParentSetup() {
-        const cls = document.getElementById('parentSetupClass').value; 
-        const stu = document.getElementById('parentSetupStudent').value;
-        const pName = document.getElementById('parentNameInput').value.trim();
-
-        if(!cls || !stu) return alert("Lütfen sınıf ve öğrenci seçin!");
-        if(!pName) return alert("Lütfen veli adını ve soyadını girin!");
+        const cls = document.getElementById('parentSetupClass').value; const stu = document.getElementById('parentSetupStudent').value; const pName = document.getElementById('parentNameInput').value.trim();
+        if(!cls || !stu) return alert("Lütfen sınıf ve öğrenci seçin!"); if(!pName) return alert("Lütfen veli adını ve soyadını girin!");
 
         if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrencinin verilerini okumak için kilitlenecektir. Onaylıyor musunuz?")) {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            
             db.ref('odevData/parentConnections').once('value').then((snapshot) => {
                 let connections = snapshot.val() || [];
                 let exists = connections.find(c => c.className === cls && c.studentName === stu && c.parentName === pName);
-                if (!exists) {
-                    connections.push({className: cls, studentName: stu, parentName: pName, date: new Date().toLocaleDateString('tr-TR')});
-                    db.ref('odevData/parentConnections').set(connections);
-                }
-                setTimeout(function() { 
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
-                    checkParentStatus();
-                }, 1500);
-            }).catch(err => {
-                alert("Bağlantı hatası! Lütfen internetinizi kontrol edin.");
-                document.getElementById('loadingOverlay').style.display = 'none';
-            });
+                if (!exists) { connections.push({className: cls, studentName: stu, parentName: pName, date: new Date().toLocaleDateString('tr-TR')}); db.ref('odevData/parentConnections').set(connections); }
+                localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
+                checkParentStatus();
+            }).catch(err => alert("Bağlantı hatası!"));
         }
     }
 
@@ -245,13 +213,8 @@
         dbRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 var data = snapshot.val();
-                savedHistories = data.history || []; 
-                pendingAssignments = data.pending || []; 
-                participationScores = data.scores || {}; 
-                
-                if (document.getElementById('screen-parent-dashboard').classList.contains('active')) {
-                    renderParentDashboard(); 
-                }
+                savedHistories = data.history || []; pendingAssignments = data.pending || []; participationScores = data.scores || {}; 
+                if (document.getElementById('screen-parent-dashboard').style.display === 'block') { renderParentDashboard(); }
             }
         });
     }
@@ -269,12 +232,8 @@
             if(record.className === className) {
                 let studentDetail = record.details.find(s => s.name === studentName);
                 if (studentDetail) {
-                    let asgRaw = record.assignment || "";
-                    let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL");
-                    let asg = linkYakalayici(asgRaw); 
-                    
-                    if(!isMaterial) { total++; if (studentDetail.isDone) doneCount++; } 
-                    else if (!studentDetail.isDone) { matIssues++; }
+                    let asgRaw = record.assignment || ""; let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL"); let asg = linkYakalayici(asgRaw); 
+                    if(!isMaterial) { total++; if (studentDetail.isDone) doneCount++; } else if (!studentDetail.isDone) { matIssues++; }
                     
                     if (isMaterial && !studentDetail.isDone) {
                         html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${asg}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
@@ -293,9 +252,7 @@
         sortedPending.forEach(p => {
             if (p.className === className) {
                 pendingCount++;
-                let isTodayOrPast = p.dueDate <= todayStr;
-                let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
-                let icon = isTodayOrPast ? '🚨' : '⏳';
+                let isTodayOrPast = p.dueDate <= todayStr; let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow'; let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
                 pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-class">${p.className}</div><div class="box-title">${linkYakalayici(p.assignment)}</div></div>`;
             }
@@ -317,17 +274,7 @@
             const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); const rateColor = getColorForRate(rate);
             let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
             
-            let statsHtml = `
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
-                <div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${rateColor};'>
-                    <div style='font-size: 36px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div>
-                    <div style='font-size: 13px; color: var(--text-muted);'>Ödev Oranı</div>
-                </div>
-                <div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${scoreColor};'>
-                    <div style='font-size: 36px; font-weight: 700; color: ${scoreColor}; margin-bottom: 4px;'>${pScore > 0 ? '+'+pScore : pScore}</div>
-                    <div style='font-size: 13px; color: var(--text-muted);'>Katılım Puanı</div>
-                </div>
-            </div>`;
+            let statsHtml = `<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;"><div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${rateColor};'><div style='font-size: 36px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div><div style='font-size: 13px; color: var(--text-muted);'>Ödev Oranı</div></div><div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${scoreColor};'><div style='font-size: 36px; font-weight: 700; color: ${scoreColor}; margin-bottom: 4px;'>${pScore > 0 ? '+'+pScore : pScore}</div><div style='font-size: 13px; color: var(--text-muted);'>Katılım Puanı</div></div></div>`;
 
             container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div>${statsHtml}${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
         }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Ödev Takip Sistemi (Firebase Modu)</title>
+    <title>Ödev Takip Sistemi</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -390,13 +390,22 @@
 
     function playWinSound() {
         initAudio(); if(audioCtx.state === 'suspended') audioCtx.resume();
-        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.type = 'triangle'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        const now = audioCtx.currentTime;
+        
+        // Kutlama (Ta-da!) Sesi: C5 - E5 - G5 - C6 Arpeji
+        const freqs = [523.25, 659.25, 783.99, 1046.50];
+        freqs.forEach((freq, index) => {
+            let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.value = freq;
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            let startTime = now + (index * 0.1);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.5);
+            
+            osc.start(startTime); osc.stop(startTime + 0.5);
+        });
     }
 
     function getColorForRate(rate) { return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)'; }
@@ -821,7 +830,7 @@
         
         let parentConn = parentConnections.find(p => p.className === cls && p.studentName === stu);
         let parentInfoHtml = parentConn 
-            ? `<div style="font-size: 15px; color: var(--success); margin-top: 8px; font-weight:500;">👨‍WAN Veli: <b style="color:white;">${parentConn.parentName}</b></div>` 
+            ? `<div style="font-size: 15px; color: var(--success); margin-top: 8px; font-weight:500;">👨‍👩‍👧 Veli: <b style="color:white;">${parentConn.parentName}</b></div>` 
             : `<div style="font-size: 14px; color: var(--danger); margin-top: 8px; font-weight:500;">⚠️ Veli Bağlantısı Yok</div>`;
 
         let streak = calculateStreak(cls, stu);
@@ -919,8 +928,9 @@
 
             let inlineButtons = appRole === 'teacher' ? `<div style="display:inline-flex; margin-left:8px;"><button style="background:var(--success); color:white; border:none; border-radius:4px; width:22px; height:22px; line-height:22px; padding:0; text-align:center; font-weight:bold; cursor:pointer; margin-right:4px;" onclick="event.stopPropagation(); manualGivePoint('${cls}', '${s}', 1)">+</button><button style="background:var(--danger); color:white; border:none; border-radius:4px; width:22px; height:22px; line-height:22px; padding:0; text-align:center; font-weight:bold; cursor:pointer;" onclick="event.stopPropagation(); manualGivePoint('${cls}', '${s}', -1)">-</button></div>` : '';
 
+            // HATA ÇÖZÜMÜ: s.split ile sadece adı alıyorduk, şimdi direkt s diyerek tam numarayı da koyduk
             html += `<tr style="border-bottom:0.5px solid rgba(255,255,255,0.05); cursor:pointer;" onclick="navigateLocal('portfolio'); document.getElementById('portClassSelect').value='${cls}'; loadPortfolioStudents(); document.getElementById('portStudentSelect').value='${s}'; syncBoardData(); renderStudentPortfolio();">
-                <td style="padding:12px 8px; display:flex; align-items:center;">${s.split(' - ')[1] || s}${parentIcon}${streakIcon}</td>
+                <td style="padding:12px 8px; display:flex; align-items:center;">${s}${parentIcon}${streakIcon}</td>
                 <td style="padding:12px 8px; font-weight:bold; color:${getColorForRate(r)};">%${r}</td>
                 <td style="padding:12px 8px; white-space:nowrap;">${p}${inlineButtons}</td>
                 <td style="padding:12px 8px; color:${st.mat>0?'var(--danger)':'var(--text-main)'};">${st.mat}</td>
@@ -1013,6 +1023,9 @@
             pickedStudent = remaining[rIndex];
             remaining.splice(rIndex, 1);
         }
+        
+        // HATA ÇÖZÜMÜ: Eğer bir nedenden ötürü boş kalırsa listeyi kurtar
+        if (!pickedStudent) pickedStudent = classData[cls][0];
 
         activeSpin = { className: cls, studentName: pickedStudent, timestamp: Date.now() }; 
         displaySpinAnimation(activeSpin); 
@@ -1024,18 +1037,24 @@
         let t = 0; let c = classData[spinData.className]; if(!c) return;
         
         let i = setInterval(()=>{ 
-            res.innerText = c[Math.floor(Math.random()*c.length)].split(' - ')[1]; 
+            // HATA ÇÖZÜMÜ: Çark dönerken ismin undefined olma riskini sıfırladık
+            let randomItem = c[Math.floor(Math.random()*c.length)];
+            res.innerText = randomItem.includes(' - ') ? randomItem.split(' - ')[1] : randomItem;
             
             if (appRole === 'board') playTick();
 
             if(t++ > 15){ 
                 clearInterval(i); 
                 let celeb = appRole === 'board' ? " 🎉🎊" : "";
-                res.innerText = "✨ " + spinData.studentName.split(' - ')[1] + celeb; 
+                
+                // Seçilen kişinin adını güvenle ayır
+                let finalName = spinData.studentName.includes(' - ') ? spinData.studentName.split(' - ')[1] : spinData.studentName;
+                res.innerText = "✨ " + finalName + celeb; 
+                
                 res.style.transform = "scale(1.2)"; res.style.color = "var(--success)"; 
                 
                 if (appRole === 'board') {
-                    playWinSound();
+                    playWinSound(); // Yeni sesimiz devrede!
                     if (typeof confetti === "function") {
                         confetti({particleCount: 150, spread: 80, origin: {y: 0.6}});
                     }

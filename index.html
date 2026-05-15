@@ -8,6 +8,31 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "bf09fc9c-611b-49ab-8ec6-6c154d450d1c",
+          notifyButton: {
+            enable: true,
+            text: {
+                'tip.state.unsubscribed': '🔔 Bildirimleri Aç',
+                'tip.state.subscribed': "🔔 Bildirimler Açık",
+                'tip.state.blocked': "🚫 Bildirimler Engellendi",
+                'message.prenotify': 'Yeni ödev ve değerlendirmelerden (Saat 15:30) anında haberdar olmak için bildirimlere izin verin.',
+                'message.action.subscribed': "Bildirimler açıldı!",
+                'message.action.resubscribed': "Bildirimler açıldı!",
+                'message.action.unsubscribed': "Bildirimler kapatıldı",
+                'dialog.main.title': 'Bildirim İzni',
+                'dialog.main.button.subscribe': 'İZİN VER',
+                'dialog.main.button.unsubscribe': 'KAPAT'
+            }
+          }
+        });
+      });
+    </script>
 
     <style>
         :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
@@ -107,7 +132,7 @@
     const dbRef = db.ref('odevData');
 
     let savedHistories = []; let pendingAssignments = [];
-    let participationScores = {}; // YENİ: Katılım puanlarını tutacak değişken
+    let participationScores = {}; 
 
     const classData = {
         "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
@@ -120,7 +145,6 @@
         "TEST": ["999 - Test Öğrencisi"]
     };
 
-    // --- LİNK YAKALAYICI MODÜL ---
     function linkYakalayici(metin) {
         if (!metin) return "";
         var urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -129,7 +153,6 @@
         });
     }
 
-    // --- ALEV SERİSİ HESAPLAYICI ---
     function calculateStreak(className, studentName) {
         let streak = 0;
         for(let i=0; i<savedHistories.length; i++) {
@@ -153,6 +176,13 @@
     function checkParentStatus() {
         let pData = localStorage.getItem('parentStudent');
         if (pData) { 
+            pData = JSON.parse(pData);
+            
+            // YENİ: OneSignal Cihazını Sınıf adıyla Etiketle
+            window.OneSignalDeferred.push(function(OneSignal) {
+                OneSignal.User.addTag("className", pData.className);
+            });
+
             document.getElementById('screen-parent-setup').classList.remove('active'); 
             document.getElementById('screen-parent-dashboard').classList.add('active'); 
             document.getElementById('logoutBtn').style.display = 'block';
@@ -217,7 +247,7 @@
                 var data = snapshot.val();
                 savedHistories = data.history || []; 
                 pendingAssignments = data.pending || []; 
-                participationScores = data.scores || {}; // YENİ: Firebase'den puanlar çekiliyor
+                participationScores = data.scores || {}; 
                 
                 if (document.getElementById('screen-parent-dashboard').classList.contains('active')) {
                     renderParentDashboard(); 
@@ -278,7 +308,6 @@
         let streak = calculateStreak(className, studentName);
         let streakIcon = streak >= 3 ? `<span style="color:var(--warning); font-size:24px; font-weight:bold; margin-left:8px;" title="${streak} Ödevlik Seri!">${streak}🔥</span>` : '';
 
-        // YENİ: Katılım Puanını çekiyoruz
         let pScore = (participationScores[className] && participationScores[className][studentName]) ? participationScores[className][studentName] : 0;
         let scoreColor = pScore > 0 ? 'var(--success)' : (pScore < 0 ? 'var(--danger)' : 'var(--info)');
 
@@ -288,7 +317,6 @@
             const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); const rateColor = getColorForRate(rate);
             let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
             
-            // YENİ: Veli paneline de Öğrenci Portfolyosundaki gibi 2 sütunlu İstatistik Paneli eklendi
             let statsHtml = `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
                 <div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${rateColor};'>

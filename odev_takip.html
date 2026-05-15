@@ -371,7 +371,6 @@
     let boardSync = { screen: 'home', portClass: '', portStudent: '', classPort: '' };
     
     let initialSyncDone = false; 
-    let pushHistory = {}; 
 
     // --- SES EFEKTLERİ MODÜLÜ (Web Audio API) ---
     let audioCtx = null;
@@ -428,53 +427,6 @@
         return streak;
     }
 
-    // --- ONESIGNAL BİLDİRİM MOTORU (CORS KORUMALI PROXY TÜNELİ İLE) ---
-    function getNext1530() {
-        let now = new Date();
-        let target = new Date(now);
-        target.setHours(15, 30, 0, 0);
-
-        if (now > target) { target.setDate(target.getDate() + 1); }
-        while (target.getDay() === 0 || target.getDay() === 6) { target.setDate(target.getDate() + 1); }
-
-        let tzOffset = -target.getTimezoneOffset();
-        let sign = tzOffset >= 0 ? '+' : '-';
-        let pad = (num) => String(Math.abs(num)).padStart(2, '0');
-        let tzString = `GMT${sign}${pad(Math.floor(tzOffset/60))}${pad(tzOffset%60)}`;
-        return `${target.getFullYear()}-${pad(target.getMonth() + 1)}-${pad(target.getDate())} ${pad(target.getHours())}:${pad(target.getMinutes())}:${pad(target.getSeconds())} ${tzString}`;
-    }
-
-    function sendPushNotification(className) {
-        if(appRole !== 'teacher') return; 
-        
-        let todayStr = new Date().toLocaleDateString('tr-TR');
-        if (pushHistory[className] === todayStr) return; 
-
-        let sendTime = getNext1530();
-        
-        let payload = {
-            app_id: "bf09fc9c-611b-49ab-8ec6-6c154d450d1c",
-            filters: [ { "field": "tag", "key": "className", "relation": "=", "value": className } ],
-            headings: { "en": "🔔 İngilizce Dersi Bilgilendirmesi", "tr": "🔔 İngilizce Dersi Bilgilendirmesi" },
-            contents: { "en": "Öğrencimiz için sisteme yeni bir değerlendirme (ödev/katılım/materyal) girilmiştir. Detayları görmek için panele göz atabilirsiniz.", "tr": "Öğrencimiz için sisteme yeni bir değerlendirme (ödev/katılım/materyal) girilmiştir. Detayları görmek için panele göz atabilirsiniz." },
-            send_after: sendTime
-        };
-
-        // YENİ: CORS engelini aşmak için proxy tünelini kullandık
-        fetch("https://corsproxy.io/?https://onesignal.com/api/v1/notifications", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Basic os_v2_app_x4e7zhdbdne2xdwgnqku2rindqlhyemsv3xup6upvd2sknjfuxbzlvclfq23tw3bvga6kmgbv4g2xlmew5r6trbfhfao5ytdmvobhna"
-            },
-            body: JSON.stringify(payload)
-        }).then(res => res.json()).then(data => {
-            console.log("Bildirim proxy tünelinden başarıyla geçti:", data);
-            pushHistory[className] = todayStr; 
-            saveToCloud();
-        }).catch(err => console.error("Bildirim Proxy Hatası:", err));
-    }
-
     const classData = {
         "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
         "5C": ["36 - Ada Temoçin", "88 - Badenur Kaya", "128 - Buğlem Altındaş", "135 - Defne Aktaş", "198 - Gamzenur Yıldız", "224 - Kerem Talha Akyıldız", "246 - Mehmet Timur Yalçın", "262 - Miraç Ege Taşhan", "263 - Miran Durma", "265 - Muhammed Arif Kavaklı", "307 - Solin Rohiv Görür", "344 - Ömer Kayra Mutlu", "355 - Timur Ula", "373 - Seyit Ali Şahin", "413 - Zeynep Cansu Bekdemir", "419 - Azra Geliç", "425 - Berk Emir Arıkan", "438 - Ecrin Ercan", "439 - Edip Yusuf Aydemir", "477 - Mira Su Ürentürk", "487 - Nazlı Ula", "488 - Nehir Armağan Bayır", "492 - Poyraz Ayçetin", "495 - Ramazan İsot", "499 - Semih Şentürk", "501 - Umut Yavaş", "508 - Zeynep Nisa Arancı"],
@@ -527,7 +479,6 @@
                 pendingAssignments = data.pending || []; 
                 timerState = data.timer || { running: false, endTime: 0, remaining: 300000 };
                 parentConnections = data.parentConnections || [];
-                pushHistory = data.pushHistory || {}; 
 
                 if (!initialSyncDone) {
                     activeGroups = data.groups || { className: '', groupCount: 0, teams: [], timestamp: 0 };
@@ -596,8 +547,7 @@
             spin: activeSpin, 
             pending: pendingAssignments, 
             parentConnections: parentConnections, 
-            boardSync: boardSync,
-            pushHistory: pushHistory 
+            boardSync: boardSync 
         };
         dbRef.set(allData).catch(function(error) { console.error("Firebase Kayıt Hatası:", error); });
     }
@@ -606,8 +556,6 @@
         if (!participationScores[cls]) participationScores[cls] = {};
         participationScores[cls][stu] = (participationScores[cls][stu] || 0) + p;
         saveToCloud();
-        sendPushNotification(cls); 
-        
         if(document.getElementById('screen-class-portfolio').classList.contains('active')) renderClassPortfolio();
         if(document.getElementById('screen-portfolio').classList.contains('active')) renderStudentPortfolio();
     }
@@ -746,7 +694,7 @@
         currentChecklist.forEach(s => { kL.push({ name: s.name, isDone: s.kitap }); if(!s.kitap) kE++; dL.push({ name: s.name, isDone: s.defter }); if(!s.defter) dE++; });
         if(kE > 0) savedHistories.unshift({ id: Date.now(), date: date, className: cls, assignment: "KİTAP EKSİK", done: (currentChecklist.length - kE), notDone: kE, details: kL });
         if(dE > 0) savedHistories.unshift({ id: Date.now() + 1, date: date, className: cls, assignment: "DEFTER EKSİK", done: (currentChecklist.length - dE), notDone: dE, details: dL });
-        if(kE === 0 && dE === 0) alert("Eksik yok!"); else { saveToCloud(); sendPushNotification(cls); alert('Kaydedildi!'); }
+        if(kE === 0 && dE === 0) alert("Eksik yok!"); else { saveToCloud(); alert('Kaydedildi!'); }
         document.getElementById('materialListContainer').innerHTML = ''; document.getElementById('btnSaveMaterial').style.display = 'none'; navigateLocal('home');
     }
 
@@ -777,9 +725,7 @@
         if(pId) { pendingAssignments = pendingAssignments.filter(p => p.id != pId); document.getElementById('saveBtn').removeAttribute('data-pending-id'); } 
         
         document.getElementById('studentListContainer').innerHTML = ''; document.getElementById('saveBtn').style.display = 'none'; document.getElementById('assignmentName').value = '';
-        saveToCloud(); 
-        sendPushNotification(cls); 
-        alert('Kaydedildi!'); navigateLocal('home'); 
+        saveToCloud(); alert('Kaydedildi!'); navigateLocal('home'); 
     }
 
     function deleteRecord(event, recordId) {
@@ -875,7 +821,7 @@
         
         let parentConn = parentConnections.find(p => p.className === cls && p.studentName === stu);
         let parentInfoHtml = parentConn 
-            ? `<div style="font-size: 15px; color: var(--success); margin-top: 8px; font-weight:500;">👨‍👩‍👧 Bağlı Veli: <b style="color:white;">${parentConn.parentName}</b></div>` 
+            ? `<div style="font-size: 15px; color: var(--success); margin-top: 8px; font-weight:500;">👨‍WAN Veli: <b style="color:white;">${parentConn.parentName}</b></div>` 
             : `<div style="font-size: 14px; color: var(--danger); margin-top: 8px; font-weight:500;">⚠️ Veli Bağlantısı Yok</div>`;
 
         let streak = calculateStreak(cls, stu);
@@ -1121,7 +1067,6 @@
         const cls = document.getElementById('randomClassSelect').value; const sName = activeSpin.studentName; if(!cls || !sName) return;
         if(!participationScores[cls]) participationScores[cls] = {}; participationScores[cls][sName] = (participationScores[cls][sName] || 0) + p;
         document.getElementById('participationButtons').style.display = 'none'; saveToCloud();
-        sendPushNotification(cls); 
     }
 </script>
 </body>

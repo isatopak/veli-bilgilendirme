@@ -43,7 +43,7 @@
         .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
         .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; justify-content: space-between; align-items: center;}
         .box-class { font-size: 32px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -1px;}
-        .box-title { font-size: 14px; font-weight: 600; line-height: 1.3; opacity: 0.9; }
+        .box-title { font-size: 14px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word;}
 
         .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--primary); animation: spin 1s linear infinite; margin-bottom: 16px; }
@@ -91,7 +91,7 @@
     </div>
 
 <script>
-    // --- FIREBASE BAĞLANTISI (YENİ MOTOR) ---
+    // --- FIREBASE BAĞLANTISI ---
     const firebaseConfig = {
       apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc",
       authDomain: "odevtakipsistemi-b9fff.firebaseapp.com",
@@ -117,6 +117,16 @@
         "6A": ["2 - Ahmet Ayaz Altıntaş", "4 - Ahmet Dere", "5 - Anıl Ergin Aksoy", "11 - Ayaz Nergiz", "14 - Can Karakaya", "17 - Çınar Yüce", "30 - Derin Eren", "35 - Dilara Aydın", "48 - Ela Nur Özbek", "62 - Ezgi Özenses", "63 - Nas Maya Kurubal", "70 - Rüzgar Can", "73 - Saliha Uysal", "84 - Selen Özdemir", "91 - Umut Bozkurt", "93 - Yiğit Er", "94 - Yusuf Hamza Özbek", "96 - Zeynep Balta", "102 - Zeynep Kalender", "105 - İlkim Nehir Tepe", "107 - Ekin Fırat Koç", "109 - Serin Üzel", "125 - Rüzgar İnan Şık", "126 - Nisa Yağmur Ülker", "127 - Eslem Nisa Altındaş", "140 - Ata Can Özdemir", "147 - Sare Karabulut", "238 - Elif Bahar Ceylan", "370 - Solin Deniz Koçin", "389 - Yusuf Uras Kılıç"],
         "7E": ["34 - Arin Eray Erdoğan", "53 - Mert Ali Balta", "60 - Beyza Gül Kalyon", "69 - Ahmet Ediz Arısoy", "101 - Asenat Aras", "112 - Barış Kazankaya", "161 - Hayrunnisa Toraman", "230 - Muhammed Mahmudov", "247 - Eda Ece Balyemez", "284 - Hafsa Öçal", "340 - Sinem Gül", "341 - Sudenaz Gürsoy", "342 - Sümeyye Kadem Işık", "345 - Tuana Şahin", "348 - Yağız Kaya", "364 - Yusuf Kuzey Özdemir", "365 - Yusuf Özkan Koç", "368 - Tolgahan Paslı", "409 - Efe Mesut Yıldırım", "441 - Dila Taşdemir", "693 - Mustafa Özgür Kütük", "884 - Fadime Eldemir"]
     };
+
+    // --- LİNK YAKALAYICI MODÜL ---
+    function linkYakalayici(metin) {
+        if (!metin) return "";
+        // Sadece URL'leri bulur ve HTML butonuna çevirir
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return metin.replace(urlRegex, function(url) {
+            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;" onclick="event.stopPropagation();">Tıkla ve Git 🔗</a>';
+        });
+    }
 
     window.onload = function() { checkParentStatus(); };
 
@@ -160,7 +170,6 @@
             
             document.getElementById('loadingOverlay').style.display = 'flex';
             
-            // Firebase'e Doğrudan Veli Kaydı
             db.ref('odevData/parentConnections').once('value').then((snapshot) => {
                 let connections = snapshot.val() || [];
                 let exists = connections.find(c => c.className === cls && c.studentName === stu && c.parentName === pName);
@@ -170,7 +179,6 @@
                     db.ref('odevData/parentConnections').set(connections);
                 }
 
-                // 5 saniye beklemeye gerek yok, Firebase çok hızlı! 1.5 saniye animasyon için yeterli.
                 setTimeout(function() { 
                     document.getElementById('loadingOverlay').style.display = 'none';
                     localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
@@ -184,13 +192,10 @@
         }
     }
 
-    // --- YENİ NESİL GERÇEK ZAMANLI DİNLEME ---
     function startSync() { 
         document.getElementById('syncStatus').style.display = 'inline-block';
         document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı'; 
         
-        // Polling (setInterval) ve XMLHttpRequest tamamen silindi!
-        // Firebase veritabanında bir değişiklik olduğu an otomatik tetiklenir.
         dbRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
                 var data = snapshot.val();
@@ -216,8 +221,10 @@
             if(record.className === className) {
                 let studentDetail = record.details.find(s => s.name === studentName);
                 if (studentDetail) {
-                    let asg = record.assignment || "";
-                    let isMaterial = asg.includes("EKSİK") || asg.includes("MATERYAL");
+                    let asgRaw = record.assignment || "";
+                    let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL");
+                    let asg = linkYakalayici(asgRaw); // Linkler butona dönüşür
+                    
                     if(!isMaterial) { total++; if (studentDetail.isDone) doneCount++; } 
                     else if (!studentDetail.isDone) { matIssues++; }
                     
@@ -234,6 +241,7 @@
         const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
         let pendingHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">';
         let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+        
         sortedPending.forEach(p => {
             if (p.className === className) {
                 pendingCount++;
@@ -241,7 +249,8 @@
                 let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
                 let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-class">${p.className}</div><div class="box-title">${p.assignment}</div></div>`;
+                // Burada da linkleri butona dönüştürüyoruz
+                pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-class">${p.className}</div><div class="box-title">${linkYakalayici(p.assignment)}</div></div>`;
             }
         });
         pendingHtml += '</div>';

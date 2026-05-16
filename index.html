@@ -124,9 +124,9 @@
                 let asgn = r.assignment || "";
                 if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) {
                     let s = r.details.find(x => x.name === studentName);
-                    if(s) {
-                        if(s.isDone) streak++;
-                        else break;
+                    if(s && !s.isAbsent) {
+                        if(s.isDone) { streak++; } 
+                        else { break; }
                     }
                 }
             }
@@ -230,14 +230,22 @@
                     let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL");
                     let asg = linkYakalayici(asgRaw); 
                     
-                    if(!isMaterial) { total++; if (studentDetail.isDone) doneCount++; } 
+                    if(!isMaterial) { 
+                        // Devamsız olanları ortalamaya (total'e) dahil etmiyoruz!
+                        if(!studentDetail.isAbsent) {
+                            total++; 
+                            if (studentDetail.isDone) doneCount++; 
+                        }
+                    } 
                     else if (!studentDetail.isDone) { matIssues++; }
                     
                     if (isMaterial && !studentDetail.isDone) {
                         html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${asg}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
                     } else if (!isMaterial) {
-                        const borderColor = studentDetail.isDone ? 'var(--success)' : 'var(--danger)'; const icon = studentDetail.isDone ? '✅' : '❌';
-                        html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${asg}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
+                        let borderColor = studentDetail.isAbsent ? 'var(--warning)' : (studentDetail.isDone ? 'var(--success)' : 'var(--danger)'); 
+                        let icon = studentDetail.isAbsent ? '➖' : (studentDetail.isDone ? '✅' : '❌');
+                        let lbl = studentDetail.isAbsent ? ' <span style="font-size:12px; font-weight:normal; color:var(--warning);">(Devamsız)</span>' : '';
+                        html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${asg}${lbl}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
                     }
                 }
             }

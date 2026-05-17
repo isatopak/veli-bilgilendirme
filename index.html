@@ -50,11 +50,22 @@
             100% { background-position: 0% 50%; }
         }
         
-        /* MODERN HEADER */
-        .app-header { background-color: rgba(28, 28, 30, 0.3); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); padding: 20px 24px; text-align: center; font-weight: 600; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .app-logo { font-size: 24px; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; font-weight: 800; background: var(--ios-orange-gradient); box-shadow: 0 4px 10px rgba(255, 69, 58, 0.3); color: white; letter-spacing: -1px;}
-        .app-title-modern { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px;}
+        /* MODERN HEADER - Üst Üste Binme Hatası Giderildi */
+        .app-header { background-color: rgba(28, 28, 30, 0.3); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); padding: 16px 20px; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         
+        .header-text-group { display: flex; flex-direction: column; flex: 1; text-align: left; }
+        
+        .app-title-modern { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.5px; line-height: 1.2; }
+        
+        #syncStatus { position: relative; font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 4px 8px; border-radius: 100px; display:none; margin-top: 6px; width: fit-content; }
+        
+        .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* YENİDEN BAĞLAN LOGOLU BUTON - Absolute Konumdan Çıkarıldı */
+        .logout-btn { position: relative; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 12px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; outline: none; }
+        .logout-btn:active { background: rgba(255,255,255,0.25); }
+
         .container { padding: 16px; }
         
         /* ANA CAM PANEL */
@@ -72,13 +83,6 @@
         option { background-color: #1C1C1E; color: #FFFFFF; font-size: 16px; }
         
         .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);}
-        
-        /* YENİDEN BAĞLAN LOGOLU BUTON */
-        .logout-btn { position: absolute; right: 16px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 14px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        
-        #syncStatus { position: absolute; left: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; display:none; }
-        .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         
         .dashboard-grid-modern { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
         .stat-card-modern { padding: 20px; border-radius: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; border: none; box-shadow: 0 8px 16px rgba(0,0,0,0.15); transition: transform 0.1s; }
@@ -119,9 +123,13 @@
 <body>
 
     <div class="app-header">
-        <span id="syncStatus"></span>
-        <span class="app-title-modern">Veli Bilgilendirme Sistemi</span>
-        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;"><span style="font-size: 14px;">🔄</span> Yeniden Bağlan</button>
+        <div class="header-text-group">
+            <span class="app-title-modern">Veli Bilgilendirme Sistemi</span>
+            <span id="syncStatus"></span>
+        </div>
+        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">
+            <span style="font-size: 14px;">🔄</span> Yeniden Bağlan
+        </button>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
@@ -288,8 +296,8 @@
     }
 
     function startSync() { 
-        document.getElementById('syncStatus').style.display = 'inline-block';
-        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>'; 
+        document.getElementById('syncStatus').style.display = 'inline-flex';
+        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span> Canlı'; 
         
         dbRef.on('value', (snapshot) => {
             if (snapshot.exists()) {

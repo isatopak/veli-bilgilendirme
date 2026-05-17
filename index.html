@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#1C1C1E">
     <title>Veli Bilgilendirme Sistemi</title>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,9 +11,8 @@
 
     <style>
         :root { 
-            --bg-color: #000000; 
-            --surface: #1C1C1E; 
-            --surface-variant: #2C2C2E; 
+            --surface: rgba(28, 28, 30, 0.45); 
+            --surface-variant: rgba(44, 44, 46, 0.55); 
             --primary: #0A84FF; 
             --on-primary: #FFFFFF; 
             --success: #30D158; 
@@ -21,33 +20,61 @@
             --warning: #FF9F0A; 
             --info: #5E5CE6; 
             --text-main: #FFFFFF; 
-            --text-muted: #EBEBF599; 
+            --text-muted: rgba(235, 235, 245, 0.7); 
 
+            --ios-orange-gradient: linear-gradient(135deg, #FF9F0A, #FF375F);
             --ios-green-gradient: linear-gradient(135deg, #30D158, #32ADE6);
             --ios-blue-gradient: linear-gradient(135deg, #0A84FF, #5E5CE6);
             --ios-dark-gradient: linear-gradient(135deg, #2C2C2E, #1C1C1E);
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
         
-        .app-header { background-color: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 20px 24px; text-align: center; font-weight: 600; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        /* HAREKETLİ VE DAHA AÇIK TONLU PREMIUM ARKA PLAN */
+        body { 
+            margin: 0; 
+            background: linear-gradient(-45deg, #2b2b36, #1e1e24, #2d232e, #1f2228); 
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            background-attachment: fixed;
+            color: var(--text-main); 
+            max-width: 500px; 
+            margin: 0 auto; 
+            min-height: 100vh; 
+            position: relative; 
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* MODERN HEADER */
+        .app-header { background-color: rgba(28, 28, 30, 0.3); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); padding: 20px 24px; text-align: center; font-weight: 600; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .app-logo { font-size: 24px; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; font-weight: 800; background: var(--ios-orange-gradient); box-shadow: 0 4px 10px rgba(255, 69, 58, 0.3); color: white; letter-spacing: -1px;}
         .app-title-modern { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px;}
         
         .container { padding: 16px; }
         
-        .glass-panel { background-color: var(--surface); border-radius: 20px; padding: 24px; margin-bottom: 16px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); }
+        /* ANA CAM PANEL */
+        .glass-panel { background-color: var(--surface); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 24px; padding: 24px; margin-bottom: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); }
         
         .setup-icon-amblem { font-size: 54px; display: flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 30px; background: var(--ios-dark-gradient); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); margin: 0 auto 24px auto; }
 
         .form-group { margin-bottom: 16px; text-align: left; }
         .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
-        input, select { width: 100%; padding: 16px; border-radius: 14px; border: none; background-color: var(--surface-variant); color: var(--text-main); font-size: 16px; outline: none; appearance: none; }
+        
+        input, select { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background-color: rgba(0,0,0,0.3); color: #FFFFFF; font-size: 16px; outline: none; appearance: none; }
         select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
         
-        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; }
+        /* TELEFONLAR İÇİN DÜZELTİLMİŞ OPTION ETİKETİ */
+        option { background-color: #1C1C1E; color: #FFFFFF; font-size: 16px; }
         
-        .logout-btn { position: absolute; right: 16px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.08); color: var(--text-main); padding: 8px 14px; border-radius: 100px; border: none; cursor: pointer; text-transform: uppercase; }
+        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);}
+        
+        /* YENİDEN BAĞLAN LOGOLU BUTON */
+        .logout-btn { position: absolute; right: 16px; font-size: 12px; font-weight: 700; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 14px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 6px; }
         
         #syncStatus { position: absolute; left: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; display:none; }
         .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
@@ -64,18 +91,25 @@
         .glass-header { font-weight: 600; font-size: 15px; text-align: left; margin-bottom: 12px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
         
         .history-list-modern { display: flex; flex-direction: column; gap: 12px; }
-        .history-item-modern { background: var(--surface); padding: 18px; border-radius: 18px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        
+        /* RENKLİ VE BUZLU CAM GEÇMİŞ KUTULARI */
+        .history-item-modern { padding: 18px; border-radius: 18px; text-align: left; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        .history-item-modern:active { filter: brightness(0.8); }
+        
+        .history-yapti { background: rgba(48, 209, 88, 0.25); border: 1px solid rgba(48, 209, 88, 0.4); box-shadow: 0 4px 15px rgba(48, 209, 88, 0.1); }
+        .history-eksik { background: rgba(255, 69, 58, 0.25); border: 1px solid rgba(255, 69, 58, 0.4); box-shadow: 0 4px 15px rgba(255, 69, 58, 0.1); }
+        .history-yok { background: rgba(255, 159, 10, 0.25); border: 1px solid rgba(255, 159, 10, 0.4); box-shadow: 0 4px 15px rgba(255, 159, 10, 0.1); }
+
         .history-left-modern { display: flex; flex-direction: column; gap: 6px; }
-        .history-date-modern { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-        .history-subject-modern { font-size: 15px; font-weight: 600; color: var(--text-main); word-break: break-word; line-height: 1.4; }
-        .history-right-modern { font-size: 22px; display: flex; align-items: center; justify-content: center; min-width: 30px; }
+        .history-date-modern { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .history-subject-modern { font-size: 15px; font-weight: 600; color: #FFF; word-break: break-word; line-height: 1.4; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .history-right-modern { font-size: 22px; display: flex; align-items: center; justify-content: center; min-width: 30px; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
         .assignment-box { padding: 18px; border-radius: 18px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); display: flex; flex-direction: column; text-align: left; margin-bottom: 12px;}
         .box-red { background: linear-gradient(135deg, #FF453A, #FF375F); color: #FFF; }
         .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
         .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; align-items: center; gap: 6px;}
-        .box-class { font-size: 24px; font-weight: 800; margin: 12px 0 6px 0; letter-spacing: -1px;}
-        .box-title { font-size: 15px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word;}
+        .box-title { font-size: 15px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word; margin-top: 10px;}
 
         .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--primary); animation: spin 1s linear infinite; margin-bottom: 16px; }
@@ -87,7 +121,7 @@
     <div class="app-header">
         <span id="syncStatus"></span>
         <span class="app-title-modern">Veli Bilgilendirme Sistemi</span>
-        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">Çıkış</button>
+        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;"><span style="font-size: 14px;">🔄</span> Yeniden Bağlan</button>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
@@ -115,7 +149,7 @@
                 </div>
                 <div class="form-group" style="margin-top: 20px;">
                     <label>Veli Adı ve Soyadı</label>
-                    <input type="text" id="parentNameInput" placeholder="Örn: Murat Yılmaz" style="border: 1px solid rgba(255,255,255,0.1);">
+                    <input type="text" id="parentNameInput" placeholder="Örn: Murat Yılmaz">
                 </div>
                 <button class="btn-vista" onclick="saveParentSetup()" style="margin-top:24px;"><span style="font-size:18px;">🔗</span> Kaydet ve Bağlan</button>
             </div>
@@ -160,7 +194,7 @@
         if (!metin) return "";
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return metin.replace(urlRegex, function(url) {
-            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;" onclick="event.stopPropagation();">Git 🔗</a>';
+            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: rgba(0,0,0,0.3); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);" onclick="event.stopPropagation();">Git 🔗</a>';
         });
     }
 
@@ -190,7 +224,7 @@
             pData = JSON.parse(pData);
             document.getElementById('screen-parent-setup').style.display = 'none'; 
             document.getElementById('screen-parent-dashboard').style.display = 'block'; 
-            document.getElementById('logoutBtn').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'flex';
             startSync(); 
         } 
         else { 
@@ -208,7 +242,6 @@
         }
     }
 
-    // SINIF SEÇİNCE ÖĞRENCİ LİSTESİNİ DOLDURAN DÜZELTİLMİŞ FONKSİYON
     function loadParentSetupStudents() {
         const cls = document.getElementById('parentSetupClass').value; 
         const stuSelect = document.getElementById('parentSetupStudent'); 
@@ -295,19 +328,29 @@
                     } 
                     else if (!studentDetail.isDone) { matIssues++; }
                     
+                    let bgClass = "";
+                    let icon = "";
+                    let lbl = "";
+
                     if (isMaterial && !studentDetail.isDone) {
-                        html += `<div class='history-item-modern' style='border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);'>
-                            <div class='history-left-modern'>
-                                <div class='history-date-modern'>${record.date}</div>
-                                <div class='history-subject-modern' style='color: var(--danger);'>⚠️ ${asg}</div>
-                            </div>
-                        </div>`;
+                        bgClass = "history-eksik";
+                        icon = "❌";
                     } else if (!isMaterial) {
-                        let borderColor = studentDetail.isAbsent ? 'var(--warning)' : (studentDetail.isDone ? 'var(--success)' : 'var(--danger)'); 
-                        let icon = studentDetail.isAbsent ? '➖' : (studentDetail.isDone ? '✅' : '❌');
-                        let lbl = studentDetail.isAbsent ? ' <span style="font-size:12px; font-weight:normal; color:var(--warning);">(Devamsız)</span>' : '';
-                        
-                        html += `<div class='history-item-modern' style='border-left: 4px solid ${borderColor};'>
+                        if (studentDetail.isAbsent) {
+                            bgClass = "history-yok";
+                            icon = "➖";
+                            lbl = " <span style='font-size:12px; font-weight:normal; opacity:0.9;'>(Devamsız)</span>";
+                        } else if (studentDetail.isDone) {
+                            bgClass = "history-yapti";
+                            icon = "✅";
+                        } else {
+                            bgClass = "history-eksik";
+                            icon = "❌";
+                        }
+                    }
+
+                    if(bgClass !== "") {
+                        html += `<div class='history-item-modern ${bgClass}'>
                             <div class='history-left-modern'>
                                 <div class='history-date-modern'>${record.date}</div>
                                 <div class='history-subject-modern'>${asg}${lbl}</div>
@@ -338,7 +381,7 @@
         const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
 
         let streak = calculateStreak(className, studentName);
-        let streakIcon = streak >= 3 ? `<div style="font-size:14px; font-weight:700; color:var(--warning); margin-top:8px; background:rgba(255, 159, 10, 0.1); display:inline-block; padding:6px 12px; border-radius:100px;">🔥 ${streak} Ödevlik Seri!</div>` : '';
+        let streakIcon = streak >= 3 ? `<div style="font-size:14px; font-weight:700; color:var(--warning); margin-top:8px; background:rgba(255, 159, 10, 0.1); display:inline-block; padding:6px 12px; border-radius:100px; box-shadow: 0 4px 10px rgba(255, 159, 10, 0.2);">🔥 ${streak} Ödevlik Seri!</div>` : '';
 
         let pScore = (participationScores[className] && participationScores[className][studentName]) ? participationScores[className][studentName] : 0;
 
@@ -347,7 +390,7 @@
         } else {
             const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100);
             
-            let matWarning = matIssues > 0 ? `<div class="glass-panel material-panel-modern"><h3 style="margin:0; color: var(--danger); font-size:15px;">⚠️ DİKKAT: ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
+            let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border:1px solid rgba(255, 69, 58, 0.4); background:rgba(255, 69, 58, 0.15);"><h3 style="margin:0; color: #FFF; font-size:15px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">⚠️ DİKKAT: ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
             
             let statsHtml = `
             <div class="dashboard-grid-modern">
@@ -361,7 +404,7 @@
                 </div>
             </div>`;
 
-            container.innerHTML = `<div style="text-align:center; margin-bottom:30px; padding-top:10px;"><div style="font-size:64px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--text-main); font-size:28px; letter-spacing:-0.5px;">${cleanName}</h2><p style="color:var(--primary); margin:6px 0 0 0; font-size:15px; font-weight:600;">${className} Sınıfı Raporu</p>${streakIcon}</div>${statsHtml}${matWarning}${pendingSection}<div class='glass-header'>✅ Kontrol Geçmişi</div><div class="history-list-modern">${html}</div>`;
+            container.innerHTML = `<div style="text-align:center; margin-bottom:30px; padding-top:10px;"><div style="font-size:64px; margin-bottom:10px; filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.3));">👤</div><h2 style="margin:0; color:var(--text-main); font-size:28px; letter-spacing:-0.5px;">${cleanName}</h2><p style="color:rgba(255,255,255,0.7); margin:6px 0 0 0; font-size:15px; font-weight:500;">${className} Sınıfı Raporu</p>${streakIcon}</div>${statsHtml}${matWarning}${pendingSection}<div class='glass-header'>✅ Kontrol Geçmişi</div><div class="history-list-modern">${html}</div>`;
         }
     }
 </script>

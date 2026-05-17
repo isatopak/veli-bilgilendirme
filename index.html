@@ -10,32 +10,73 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        :root { --bg-color: #000000; --surface: #1C1C1E; --surface-variant: #2C2C2E; --primary: #0A84FF; --on-primary: #FFFFFF; --success: #30D158; --danger: #FF453A; --warning: #FF9F0A; --info: #5E5CE6; --text-main: #FFFFFF; --text-muted: #EBEBF599; }
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; }
+        :root { 
+            --bg-color: #000000; 
+            --surface: #1C1C1E; 
+            --surface-variant: #2C2C2E; 
+            --primary: #0A84FF; 
+            --on-primary: #FFFFFF; 
+            --success: #30D158; 
+            --danger: #FF453A; 
+            --warning: #FF9F0A; 
+            --info: #5E5CE6; 
+            --text-main: #FFFFFF; 
+            --text-muted: #EBEBF599; 
+
+            --ios-green-gradient: linear-gradient(135deg, #30D158, #32ADE6);
+            --ios-blue-gradient: linear-gradient(135deg, #0A84FF, #5E5CE6);
+            --ios-dark-gradient: linear-gradient(135deg, #2C2C2E, #1C1C1E);
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background-color: var(--bg-color); color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
         
-        .app-header { background: rgba(28, 28, 30, 0.8); backdrop-filter: blur(10px); padding: 18px; text-align: center; font-weight: 600; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10;}
+        .app-header { background-color: rgba(28, 28, 30, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 20px 24px; text-align: center; font-weight: 600; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: center; }
+        .app-title-modern { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px;}
+        
         .container { padding: 16px; }
-        .glass-panel { background: var(--surface); border-radius: 18px; padding: 24px; margin-bottom: 16px; text-align: center; }
         
+        .glass-panel { background-color: var(--surface); border-radius: 20px; padding: 24px; margin-bottom: 16px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.05); }
+        
+        .setup-icon-amblem { font-size: 54px; display: flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 30px; background: var(--ios-dark-gradient); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); margin: 0 auto 24px auto; }
+
         .form-group { margin-bottom: 16px; text-align: left; }
-        input, select { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--surface-variant); color: #fff; outline: none; }
-        .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 14px; background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
+        input, select { width: 100%; padding: 16px; border-radius: 14px; border: none; background-color: var(--surface-variant); color: var(--text-main); font-size: 16px; outline: none; appearance: none; }
+        select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
         
-        .logout-btn { position: absolute; right: 16px; font-size: 11px; font-weight: 700; background: rgba(255, 69, 58, 0.2); color: var(--danger); padding: 6px 12px; border-radius: 100px; border: 0.5px solid rgba(255, 69, 58, 0.4); cursor: pointer; text-transform: uppercase; }
+        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; }
+        
+        .logout-btn { position: absolute; right: 16px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.08); color: var(--text-main); padding: 8px 14px; border-radius: 100px; border: none; cursor: pointer; text-transform: uppercase; }
+        
         #syncStatus { position: absolute; left: 16px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 6px 12px; border-radius: 100px; display:none; }
         .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
         
-        .history-card { background: var(--surface-variant); padding: 16px; border-radius: 14px; border-left: 4px solid var(--primary); margin-bottom: 12px; text-align: left; }
-        .assignment-box { padding: 16px; border-radius: 18px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); display: flex; flex-direction: column; text-align: left;}
+        .dashboard-grid-modern { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card-modern { padding: 20px; border-radius: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; border: none; box-shadow: 0 8px 16px rgba(0,0,0,0.15); transition: transform 0.1s; }
+        
+        .stat-avg { background: var(--ios-green-gradient); color: #FFF; }
+        .stat-pnt { background: var(--ios-blue-gradient); color: #FFF; }
+        .stat-label-modern { font-size: 13px; font-weight: 600; opacity: 0.9; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-value-modern { font-size: 38px; font-weight: 800; margin: 4px 0 0 0; letter-spacing: -1px; }
+
+        .glass-header { font-weight: 600; font-size: 15px; text-align: left; margin-bottom: 12px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        .history-list-modern { display: flex; flex-direction: column; gap: 12px; }
+        .history-item-modern { background: var(--surface); padding: 18px; border-radius: 18px; text-align: left; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .history-left-modern { display: flex; flex-direction: column; gap: 6px; }
+        .history-date-modern { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .history-subject-modern { font-size: 15px; font-weight: 600; color: var(--text-main); word-break: break-word; line-height: 1.4; }
+        .history-right-modern { font-size: 22px; display: flex; align-items: center; justify-content: center; min-width: 30px; }
+
+        .assignment-box { padding: 18px; border-radius: 18px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); display: flex; flex-direction: column; text-align: left; margin-bottom: 12px;}
         .box-red { background: linear-gradient(135deg, #FF453A, #FF375F); color: #FFF; }
         .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
-        .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; justify-content: space-between; align-items: center;}
-        .box-class { font-size: 32px; font-weight: 800; margin: 12px 0 4px 0; letter-spacing: -1px;}
-        .box-title { font-size: 14px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word;}
-        .framed-heading { background: var(--surface-variant); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; color: var(--text-main); font-weight: 600; font-size: 16px; text-align: left;}
-        
+        .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; align-items: center; gap: 6px;}
+        .box-class { font-size: 24px; font-weight: 800; margin: 12px 0 6px 0; letter-spacing: -1px;}
+        .box-title { font-size: 15px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word;}
+
         .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--primary); animation: spin 1s linear infinite; margin-bottom: 16px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -45,8 +86,8 @@
 
     <div class="app-header">
         <span id="syncStatus"></span>
-        Veli Bilgilendirme
-        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">🔄 Yeniden Bağlan</button>
+        <span class="app-title-modern">Veli Bilgilendirme Sistemi</span>
+        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">Çıkış</button>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay">
@@ -56,30 +97,36 @@
 
     <div class="container">
         <div id="screen-parent-setup" style="display:block;">
-            <div class="glass-panel" style="text-align:center; padding: 30px 20px; margin-top:20px;">
-                <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-bottom:16px;">
-                    <div style="font-size: 56px;">👨‍👩‍👧</div><div style="font-size: 24px; color: var(--text-muted);">🔗</div><div style="font-size: 56px;">👤</div>
-                </div>
-                <h2 style="margin-top:0; color:var(--primary); font-size: 24px;">Veli Cihaz Eşleştirme</h2>
-                <p style="color:var(--text-muted); margin-bottom:24px; font-size:15px;">Öğrenciyi seçin ve kendi adınızı girin. Bu cihaz seçilen öğrenci için kilitlenecektir.</p>
+            <div class="glass-panel" style="margin-top:20px;">
+                <div class="setup-icon-amblem">📲👤</div>
+                <h2 style="margin-top:0; font-size: 24px; letter-spacing:-0.5px;">Cihaz Eşleştirme</h2>
+                <p style="color:var(--text-muted); margin-bottom:30px; font-size:14px;">Öğrenciyi seçin ve kendi adınızı girin. Bu cihaz seçilen öğrenci için kilitlenecektir.</p>
                 
                 <div class="form-group">
+                    <label>Sınıf Seçiniz</label>
                     <select id="parentSetupClass" onchange="loadParentSetupStudents()">
-                        <option value="" disabled selected>Öğrencinin Sınıfı...</option>
+                        <option value="" disabled selected>Lütfen Seçin...</option>
                         <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
                     </select>
                 </div>
-                <div class="form-group"><select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select></div>
-                <div class="form-group" style="margin-top: 20px;"><input type="text" id="parentNameInput" placeholder="Veli Adı ve Soyadı" style="border: 1px solid var(--info);"></div>
-                <button class="btn-primary" onclick="saveParentSetup()" style="margin-top:24px;">✅ Kaydet ve Bağlan</button>
+                <div class="form-group">
+                    <label>Öğrenci Seçiniz</label>
+                    <select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Veli Adı ve Soyadı</label>
+                    <input type="text" id="parentNameInput" placeholder="Örn: Murat Yılmaz" style="border: 1px solid rgba(255,255,255,0.1);">
+                </div>
+                <button class="btn-vista" onclick="saveParentSetup()" style="margin-top:24px;"><span style="font-size:18px;">🔗</span> Kaydet ve Bağlan</button>
             </div>
         </div>
 
-        <div id="screen-parent-dashboard" style="display:none;"><div id="parentDashboardContainer"></div></div>
+        <div id="screen-parent-dashboard" style="display:none;">
+            <div id="parentDashboardContainer"></div>
+        </div>
     </div>
 
 <script>
-    // --- FIREBASE BAĞLANTISI ---
     const firebaseConfig = {
       apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc",
       authDomain: "odevtakipsistemi-b9fff.firebaseapp.com",
@@ -94,7 +141,8 @@
     const db = firebase.database();
     const dbRef = db.ref('odevData');
 
-    let savedHistories = []; let pendingAssignments = [];
+    let savedHistories = []; 
+    let pendingAssignments = [];
     let participationScores = {}; 
 
     const classData = {
@@ -112,7 +160,7 @@
         if (!metin) return "";
         var urlRegex = /(https?:\/\/[^\s]+)/g;
         return metin.replace(urlRegex, function(url) {
-            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;" onclick="event.stopPropagation();">Tıkla ve Git 🔗</a>';
+            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: var(--primary); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold;" onclick="event.stopPropagation();">Git 🔗</a>';
         });
     }
 
@@ -125,8 +173,8 @@
                 if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) {
                     let s = r.details.find(x => x.name === studentName);
                     if(s && !s.isAbsent) {
-                        if(s.isDone) { streak++; } 
-                        else { break; }
+                        if(s.isDone) streak++;
+                        else break;
                     }
                 }
             }
@@ -160,9 +208,20 @@
         }
     }
 
+    // SINIF SEÇİNCE ÖĞRENCİ LİSTESİNİ DOLDURAN DÜZELTİLMİŞ FONKSİYON
     function loadParentSetupStudents() {
-        const cls = document.getElementById('parentSetupClass').value; const stuSelect = document.getElementById('parentSetupStudent'); stuSelect.innerHTML = '<option value="" disabled selected>Öğrenci Seçiniz...</option>';
-        if(cls) { classData[cls].forEach(s => { const opt = document.createElement('option'); opt.value = s; opt.text = s; stuSelect.appendChild(opt); }); stuSelect.disabled = false; }
+        const cls = document.getElementById('parentSetupClass').value; 
+        const stuSelect = document.getElementById('parentSetupStudent'); 
+        stuSelect.innerHTML = '<option value="" disabled selected>Öğrenci Seçiniz...</option>';
+        if(cls && classData[cls]) { 
+            classData[cls].forEach(s => { 
+                const opt = document.createElement('option'); 
+                opt.value = s; 
+                opt.text = s; 
+                stuSelect.appendChild(opt); 
+            }); 
+            stuSelect.disabled = false; 
+        }
     }
     
     function saveParentSetup() {
@@ -197,7 +256,7 @@
 
     function startSync() { 
         document.getElementById('syncStatus').style.display = 'inline-block';
-        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>Canlı'; 
+        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>'; 
         
         dbRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
@@ -212,8 +271,6 @@
             }
         });
     }
-
-    function getColorForRate(rate) { return rate >= 80 ? 'var(--success)' : rate >= 50 ? 'var(--warning)' : 'var(--danger)'; }
 
     function renderParentDashboard() {
         let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
@@ -231,7 +288,6 @@
                     let asg = linkYakalayici(asgRaw); 
                     
                     if(!isMaterial) { 
-                        // Devamsız olanları ortalamaya (total'e) dahil etmiyoruz!
                         if(!studentDetail.isAbsent) {
                             total++; 
                             if (studentDetail.isDone) doneCount++; 
@@ -240,19 +296,31 @@
                     else if (!studentDetail.isDone) { matIssues++; }
                     
                     if (isMaterial && !studentDetail.isDone) {
-                        html += `<div class='history-card' style='border-left-color: var(--danger); background: rgba(255, 69, 58, 0.1);'><h3 style='color: var(--danger); margin:0;'>⚠️ ${asg}</h3><p style='color: var(--text-main); margin-top:6px;'>Tarih: ${record.date}</p></div>`;
+                        html += `<div class='history-item-modern' style='border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);'>
+                            <div class='history-left-modern'>
+                                <div class='history-date-modern'>${record.date}</div>
+                                <div class='history-subject-modern' style='color: var(--danger);'>⚠️ ${asg}</div>
+                            </div>
+                        </div>`;
                     } else if (!isMaterial) {
                         let borderColor = studentDetail.isAbsent ? 'var(--warning)' : (studentDetail.isDone ? 'var(--success)' : 'var(--danger)'); 
                         let icon = studentDetail.isAbsent ? '➖' : (studentDetail.isDone ? '✅' : '❌');
                         let lbl = studentDetail.isAbsent ? ' <span style="font-size:12px; font-weight:normal; color:var(--warning);">(Devamsız)</span>' : '';
-                        html += `<div class='history-card' style='border-left-color: ${borderColor};'><div style='display: flex; justify-content: space-between; align-items:flex-start;'><h3 style='margin:0; flex:1;'>${asg}${lbl}</h3><span style='font-size: 20px; margin-left:10px;'>${icon}</span></div><p style='margin-top:8px;'>📅 ${record.date}</p></div>`;
+                        
+                        html += `<div class='history-item-modern' style='border-left: 4px solid ${borderColor};'>
+                            <div class='history-left-modern'>
+                                <div class='history-date-modern'>${record.date}</div>
+                                <div class='history-subject-modern'>${asg}${lbl}</div>
+                            </div>
+                            <div class='history-right-modern'>${icon}</div>
+                        </div>`;
                     }
                 }
             }
         }
 
         const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-        let pendingHtml = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">';
+        let pendingHtml = '';
         let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
         
         sortedPending.forEach(p => {
@@ -262,39 +330,38 @@
                 let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
                 let icon = isTodayOrPast ? '🚨' : '⏳';
                 let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
-                pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-class">${p.className}</div><div class="box-title">${linkYakalayici(p.assignment)}</div></div>`;
+                pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-title">${linkYakalayici(p.assignment)}</div></div>`;
             }
         });
-        pendingHtml += '</div>';
         
-        let pendingSection = pendingCount > 0 ? `<div class='framed-heading' style='margin-top:24px;'><span>📌 Ödev Hatırlatıcı</span></div>${pendingHtml}` : "";
+        let pendingSection = pendingCount > 0 ? `<div class='glass-header'>📌 Yaklaşan Ödevler</div><div id="homeReminderList">${pendingHtml}</div>` : "";
         const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
 
         let streak = calculateStreak(className, studentName);
-        let streakIcon = streak >= 3 ? `<span style="color:var(--warning); font-size:24px; font-weight:bold; margin-left:8px;" title="${streak} Ödevlik Seri!">${streak}🔥</span>` : '';
+        let streakIcon = streak >= 3 ? `<div style="font-size:14px; font-weight:700; color:var(--warning); margin-top:8px; background:rgba(255, 159, 10, 0.1); display:inline-block; padding:6px 12px; border-radius:100px;">🔥 ${streak} Ödevlik Seri!</div>` : '';
 
         let pScore = (participationScores[className] && participationScores[className][studentName]) ? participationScores[className][studentName] : 0;
-        let scoreColor = pScore > 0 ? 'var(--success)' : (pScore < 0 ? 'var(--danger)' : 'var(--info)');
 
         if (total === 0 && pendingCount === 0 && matIssues === 0 && pScore === 0) { 
-            container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 30px 20px;">Sisteme girilmiş bir kayıt bulunmuyor.</div>`; 
+            container.innerHTML = `<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:64px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--text-main); font-size:26px;">${cleanName}</h2><p style="color:var(--primary); margin:6px 0 0 0; font-size:15px; font-weight:600;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">Öğrenciye ait henüz bir kayıt bulunmuyor.</div>`; 
         } else {
-            const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100); const rateColor = getColorForRate(rate);
-            let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border-left: 4px solid var(--danger); background: rgba(255, 69, 58, 0.05);"><h3 style="margin:0; color: var(--danger);">⚠️ ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
+            const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+            
+            let matWarning = matIssues > 0 ? `<div class="glass-panel material-panel-modern"><h3 style="margin:0; color: var(--danger); font-size:15px;">⚠️ DİKKAT: ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
             
             let statsHtml = `
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;">
-                <div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${rateColor};'>
-                    <div style='font-size: 36px; font-weight: 700; color: ${rateColor}; margin-bottom: 4px;'>%${rate}</div>
-                    <div style='font-size: 13px; color: var(--text-muted);'>Ödev Oranı</div>
+            <div class="dashboard-grid-modern">
+                <div class='stat-card-modern stat-avg'>
+                    <div class='stat-label-modern'>Ödev Oranı</div>
+                    <div class='stat-value-modern'>%${rate}</div>
                 </div>
-                <div class='glass-panel' style='margin:0; text-align: center; border-left: 4px solid ${scoreColor};'>
-                    <div style='font-size: 36px; font-weight: 700; color: ${scoreColor}; margin-bottom: 4px;'>${pScore > 0 ? '+'+pScore : pScore}</div>
-                    <div style='font-size: 13px; color: var(--text-muted);'>Katılım Puanı</div>
+                <div class='stat-card-modern stat-pnt'>
+                    <div class='stat-label-modern'>Katılım Puanı</div>
+                    <div class='stat-value-modern'>${pScore > 0 ? '+'+pScore : pScore}</div>
                 </div>
             </div>`;
 
-            container.innerHTML = `<div style="text-align:center; margin-bottom:24px; padding-top:10px;"><div style="font-size:56px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--primary); font-size:26px; display:flex; justify-content:center; align-items:center;">${cleanName}${streakIcon}</h2><p style="color:var(--text-muted); margin:6px 0 0 0; font-size:16px;">${className} Raporu</p></div>${statsHtml}${matWarning}${pendingSection}<div class='framed-heading' style='margin-top:24px;'><span>✅ Kontrol Geçmişi</span></div>${html}`;
+            container.innerHTML = `<div style="text-align:center; margin-bottom:30px; padding-top:10px;"><div style="font-size:64px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--text-main); font-size:28px; letter-spacing:-0.5px;">${cleanName}</h2><p style="color:var(--primary); margin:6px 0 0 0; font-size:15px; font-weight:600;">${className} Sınıfı Raporu</p>${streakIcon}</div>${statsHtml}${matWarning}${pendingSection}<div class='glass-header'>✅ Kontrol Geçmişi</div><div class="history-list-modern">${html}</div>`;
         }
     }
 </script>

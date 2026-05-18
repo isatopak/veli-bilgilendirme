@@ -224,6 +224,15 @@
         return streak;
     }
 
+    // VELİ PANELİ İÇİN ÖZEL ROZET FONKSİYONU
+    function getVeliStreakBadge(streak) {
+        if (streak >= 20) return `<div style="font-size:14px; font-weight:700; color:#FFD700; margin-top:8px; background:rgba(255, 215, 0, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(255,215,0,0.3); box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);">👑 ${streak} Efsanevi Seri!</div>`;
+        if (streak >= 10) return `<div style="font-size:14px; font-weight:700; color:#00E5FF; margin-top:8px; background:rgba(0, 229, 255, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(0,229,255,0.3); box-shadow: 0 4px 10px rgba(0, 229, 255, 0.2);">💎 ${streak} Elmas Seri!</div>`;
+        if (streak >= 5) return `<div style="font-size:14px; font-weight:700; color:#FFEA00; margin-top:8px; background:rgba(255, 234, 0, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(255,234,0,0.3); box-shadow: 0 4px 10px rgba(255, 234, 0, 0.2);">⭐ ${streak} Yıldız Seri!</div>`;
+        if (streak >= 3) return `<div style="font-size:14px; font-weight:700; color:var(--warning); margin-top:8px; background:rgba(255, 159, 10, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(255,159,10,0.3); box-shadow: 0 4px 10px rgba(255, 159, 10, 0.2);">🔥 ${streak} Ödevlik Seri!</div>`;
+        return '';
+    }
+
     window.onload = function() { checkParentStatus(); };
 
     function checkParentStatus() {
@@ -296,8 +305,8 @@
     }
 
     function startSync() { 
-        document.getElementById('syncStatus').style.display = 'inline-flex';
-        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span> Canlı'; 
+        document.getElementById('syncStatus').style.display = 'inline-block';
+        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>'; 
         
         dbRef.on('value', (snapshot) => {
             if (snapshot.exists()) {
@@ -389,7 +398,7 @@
         const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
 
         let streak = calculateStreak(className, studentName);
-        let streakIcon = streak >= 3 ? `<div style="font-size:14px; font-weight:700; color:var(--warning); margin-top:8px; background:rgba(255, 159, 10, 0.1); display:inline-block; padding:6px 12px; border-radius:100px; box-shadow: 0 4px 10px rgba(255, 159, 10, 0.2);">🔥 ${streak} Ödevlik Seri!</div>` : '';
+        let streakIcon = getVeliStreakBadge(streak);
 
         let pScore = (participationScores[className] && participationScores[className][studentName]) ? participationScores[className][studentName] : 0;
 

@@ -11,59 +11,136 @@
 
     <style>
         :root { 
-            --surface: rgba(28, 28, 30, 0.7); --primary: #0A84FF; --text-main: #FFFFFF; --text-muted: rgba(235, 235, 245, 0.7); 
-            --ios-green-gradient: linear-gradient(135deg, #30D158, #32ADE6); --ios-blue-gradient: linear-gradient(135deg, #0A84FF, #5E5CE6);
+            --surface: rgba(28, 28, 30, 0.45); 
+            --surface-variant: rgba(44, 44, 46, 0.55); 
+            --primary: #0A84FF; 
+            --on-primary: #FFFFFF; 
+            --success: #30D158; 
+            --danger: #FF453A; 
+            --warning: #FF9F0A; 
+            --info: #5E5CE6; 
+            --text-main: #FFFFFF; 
+            --text-muted: rgba(235, 235, 245, 0.7); 
+
+            --ios-orange-gradient: linear-gradient(135deg, #FF9F0A, #FF375F);
+            --ios-green-gradient: linear-gradient(135deg, #30D158, #32ADE6);
+            --ios-blue-gradient: linear-gradient(135deg, #0A84FF, #5E5CE6);
             --ios-dark-gradient: linear-gradient(135deg, #2C2C2E, #1C1C1E);
         }
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
-        html { background-color: #1e1e24; height: 100%; overscroll-behavior-y: none; }
-        body { margin: 0; background: linear-gradient(-45deg, #2b2b36, #1e1e24, #2d232e, #1f2228); background-size: 400% 400%; animation: gradientBG 15s ease infinite; background-attachment: fixed; color: var(--text-main); max-width: 500px; margin: 0 auto; min-height: 100vh; position: relative; }
-        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        
-        .announcements-slider { display: flex; overflow-x: auto; gap: 12px; padding: 4px 4px 16px 4px; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; margin-bottom: 8px; }
-        .announcements-slider::-webkit-scrollbar { display: none; }
-        .announcement-card { flex: 0 0 88%; scroll-snap-align: start; background: rgba(94, 92, 230, 0.15); backdrop-filter: blur(25px); border: 1px solid rgba(94, 92, 230, 0.4); border-radius: 22px; padding: 18px; text-align: left; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); }
-        .announcement-card.latest { border: 1px solid rgba(255, 69, 58, 0.5) !important; background: rgba(255, 69, 58, 0.1) !important; }
-        
-        .app-header { background-color: rgba(28, 28, 30, 0.5); backdrop-filter: blur(25px); padding: 16px 20px; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        .header-text-group { display: flex; flex-direction: column; flex: 1; text-align: left; }
-        .app-title-modern { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
-        #syncStatus { font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 4px 8px; border-radius: 100px; display:none; margin-top: 6px; width: fit-content; }
-        .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: #30D158; border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        .logout-btn { font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 12px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 6px; outline: none; border: none; }
-        
-        .container { padding: 16px; }
-        .glass-panel { background-color: var(--surface); backdrop-filter: blur(25px); border-radius: 24px; padding: 24px; margin-bottom: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); }
-        .setup-icon-amblem { font-size: 54px; display: flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 30px; background: var(--ios-dark-gradient); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); margin: 0 auto 24px auto; }
-        
-        .form-group { margin-bottom: 16px; text-align: left; }
-        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #FFFFFF; text-transform: uppercase; }
-        input, select { 
-            width: 100%; padding: 16px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.3); 
-            background-color: #1C1C1E; color: #FFFFFF; font-size: 16px; outline: none; 
-        }
-        select option { background-color: #2C2C2E; color: #FFFFFF; font-size: 16px; }
-        input::placeholder { color: rgba(255,255,255,0.5); }
 
-        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: #FFF; background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);}
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* BEYAZ EKRAN SEKME SORUNUNUN ÇÖZÜMÜ BURADA */
+        html {
+            background-color: #1e1e24; /* Varsayılan arka planı koyu yapar */
+            height: 100%;
+            overscroll-behavior-y: none; /* Sayfanın aşağı-yukarı sekmesini kilitler */
+        }
+
+        body { 
+            margin: 0; 
+            background: linear-gradient(-45deg, #2b2b36, #1e1e24, #2d232e, #1f2228); 
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            background-attachment: fixed;
+            color: var(--text-main); 
+            max-width: 500px; 
+            margin: 0 auto; 
+            min-height: 100vh; 
+            position: relative; 
+            overscroll-behavior-y: none; /* Body için de ekstra güvenlik */
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .announcements-slider {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding: 4px 4px 16px 4px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 8px;
+        }
+        .announcements-slider::-webkit-scrollbar { display: none; }
+        
+        .announcement-card {
+            flex: 0 0 88%;
+            scroll-snap-align: start;
+            background: rgba(94, 92, 230, 0.15);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(94, 92, 230, 0.4);
+            border-radius: 22px;
+            padding: 18px;
+            text-align: left;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.6); } 70% { box-shadow: 0 0 0 12px rgba(255, 69, 58, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); } }
+        .announcement-card.latest { 
+            animation: pulse-red 2.5s infinite; 
+            border: 1px solid rgba(255, 69, 58, 0.5) !important;
+            background: rgba(255, 69, 58, 0.1) !important;
+        }
+        
+        .app-header { background-color: rgba(28, 28, 30, 0.3); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); padding: 16px 20px; border-bottom: 0.5px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .header-text-group { display: flex; flex-direction: column; flex: 1; text-align: left; }
+        .app-title-modern { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.5px; line-height: 1.2; }
+        
+        #syncStatus { position: relative; font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.1); color: #EBEBF5; padding: 4px 8px; border-radius: 100px; display:none; margin-top: 6px; width: fit-content; }
+        .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        .logout-btn { position: relative; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 12px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; outline: none; }
+        .logout-btn:active { background: rgba(255,255,255,0.25); }
+
+        .container { padding: 16px; }
+        
+        .glass-panel { background-color: var(--surface); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 24px; padding: 24px; margin-bottom: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); }
+        
+        .setup-icon-amblem { font-size: 54px; display: flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 30px; background: var(--ios-dark-gradient); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); margin: 0 auto 24px auto; }
+
+        .form-group { margin-bottom: 16px; text-align: left; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--text-muted); text-transform: uppercase; }
+        
+        input, select { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background-color: rgba(0,0,0,0.3); color: #FFFFFF; font-size: 16px; outline: none; appearance: none; }
+        select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
+        option { background-color: #1C1C1E; color: #FFFFFF; font-size: 16px; }
+        
+        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);}
         
         .dashboard-grid-modern { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
-        .stat-card-modern { padding: 20px; border-radius: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+        .stat-card-modern { padding: 20px; border-radius: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; border: none; box-shadow: 0 8px 16px rgba(0,0,0,0.15); transition: transform 0.1s; }
         .stat-avg { background: var(--ios-green-gradient); color: #FFF; }
         .stat-pnt { background: var(--ios-blue-gradient); color: #FFF; }
         .stat-label-modern { font-size: 13px; font-weight: 600; opacity: 0.9; text-transform: uppercase; margin-bottom: 4px; }
         .stat-value-modern { font-size: 38px; font-weight: 800; margin: 4px 0 0 0; letter-spacing: -1px; }
+
         .glass-header { font-weight: 600; font-size: 15px; text-align: left; margin-bottom: 12px; margin-top: 24px; display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
+        
         .history-list-modern { display: flex; flex-direction: column; gap: 12px; }
-        .history-item-modern { padding: 18px; border-radius: 18px; text-align: left; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(15px); }
-        .history-yapti { background: rgba(48, 209, 88, 0.25); border: 1px solid rgba(48, 209, 88, 0.4); }
-        .history-eksik { background: rgba(255, 69, 58, 0.25); border: 1px solid rgba(255, 69, 58, 0.4); }
-        .history-yok { background: rgba(255, 159, 10, 0.25); border: 1px solid rgba(255, 159, 10, 0.4); }
+        .history-item-modern { padding: 18px; border-radius: 18px; text-align: left; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
+        .history-item-modern:active { filter: brightness(0.8); }
+        .history-yapti { background: rgba(48, 209, 88, 0.25); border: 1px solid rgba(48, 209, 88, 0.4); box-shadow: 0 4px 15px rgba(48, 209, 88, 0.1); }
+        .history-eksik { background: rgba(255, 69, 58, 0.25); border: 1px solid rgba(255, 69, 58, 0.4); box-shadow: 0 4px 15px rgba(255, 69, 58, 0.1); }
+        .history-yok { background: rgba(255, 159, 10, 0.25); border: 1px solid rgba(255, 159, 10, 0.4); box-shadow: 0 4px 15px rgba(255, 159, 10, 0.1); }
         .history-left-modern { display: flex; flex-direction: column; gap: 6px; }
-        .history-date-modern { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; }
-        .history-subject-modern { font-size: 15px; font-weight: 600; color: #FFF; }
-        .history-right-modern { font-size: 22px; }
+        .history-date-modern { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .history-subject-modern { font-size: 15px; font-weight: 600; color: #FFF; word-break: break-word; line-height: 1.4; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .history-right-modern { font-size: 22px; display: flex; align-items: center; justify-content: center; min-width: 30px; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+        .assignment-box { padding: 18px; border-radius: 18px; position: relative; box-shadow: 0 8px 16px rgba(0,0,0,0.15); display: flex; flex-direction: column; text-align: left; margin-bottom: 12px;}
+        .box-red { background: linear-gradient(135deg, #FF453A, #FF375F); color: #FFF; }
+        .box-yellow { background: linear-gradient(135deg, #FFD60A, #FF9F0A); color: #000; }
+        .box-date { font-size: 12px; font-weight: 700; opacity: 0.8; display: flex; align-items: center; gap: 6px;}
+        .box-title { font-size: 15px; font-weight: 600; line-height: 1.3; opacity: 0.9; word-break: break-word; margin-top: 10px;}
+
         .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; border-left-color: var(--primary); animation: spin 1s linear infinite; margin-bottom: 16px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -76,49 +153,48 @@
             <span class="app-title-modern">Veli Bilgilendirme Sistemi</span>
             <span id="syncStatus"></span>
         </div>
-        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">🔄 Yeniden Bağlan</button>
+        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">
+            <span style="font-size: 14px;">🔄</span> Yeniden Bağlan
+        </button>
     </div>
-    <div id="loadingOverlay" class="loading-overlay"><div class="spinner"></div><div style="font-weight: 600; font-size: 16px;">Sisteme Kaydediliyor...</div></div>
+
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div style="font-weight: 600; font-size: 16px;">Sisteme Kaydediliyor...</div>
+    </div>
 
     <div class="container">
         <div id="screen-parent-setup" style="display:block;">
             <div class="glass-panel" style="margin-top:20px;">
                 <div class="setup-icon-amblem">📲👤</div>
                 <h2 style="margin-top:0; font-size: 24px; letter-spacing:-0.5px;">Cihaz Eşleştirme</h2>
+                <p style="color:var(--text-muted); margin-bottom:30px; font-size:14px;">Öğrenciyi seçin ve kendi adınızı girin. Bu cihaz seçilen öğrenci için kilitlenecektir.</p>
                 
                 <div class="form-group">
                     <label>Sınıf Seçiniz</label>
                     <select id="parentSetupClass" onchange="loadParentSetupStudents()">
                         <option value="" disabled selected>Lütfen Seçin...</option>
-                        <option value="5B">5B</option><option value="5C">5C</option>
-                        <option value="5D">5D</option><option value="5E">5E</option>
-                        <option value="5YDA">5YDA</option><option value="6A">6A</option>
-                        <option value="7E">7E</option><option value="TEST">TEST</option>
+                        <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
                     <label>Öğrenci Seçiniz</label>
-                    <select id="parentSetupStudent">
-                        <option value="" disabled selected>Önce sınıf seçin...</option>
-                    </select>
+                    <select id="parentSetupStudent" disabled><option value="" disabled selected>Önce sınıf seçin...</option></select>
                 </div>
-                
                 <div class="form-group" style="margin-top: 20px;">
                     <label>Veli Adı ve Soyadı</label>
                     <input type="text" id="parentNameInput" placeholder="Örn: Murat Yılmaz">
                 </div>
-                
-                <button class="btn-vista" onclick="saveParentSetup()" style="margin-top:24px;">🔗 Kaydet ve Bağlan</button>
+                <button class="btn-vista" onclick="saveParentSetup()" style="margin-top:24px;"><span style="font-size:18px;">🔗</span> Kaydet ve Bağlan</button>
             </div>
         </div>
-        
-        <div id="screen-parent-dashboard" style="display:none;"><div id="parentDashboardContainer"></div></div>
+
+        <div id="screen-parent-dashboard" style="display:none;">
+            <div id="parentDashboardContainer"></div>
+        </div>
     </div>
 
 <script>
-    const BOT_KULLANICI_ADI = "EsenkentIngilizce_bot"; 
-
     const classData = {
         "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
         "5C": ["36 - Ada Temoçin", "88 - Badenur Kaya", "128 - Buğlem Altındaş", "135 - Defne Aktaş", "198 - Gamzenur Yıldız", "224 - Kerem Talha Akyıldız", "246 - Mehmet Timur Yalçın", "262 - Miraç Ege Taşhan", "263 - Miran Durma", "265 - Muhammed Arif Kavaklı", "307 - Solin Rohiv Görür", "344 - Ömer Kayra Mutlu", "355 - Timur Ula", "373 - Seyit Ali Şahin", "413 - Zeynep Cansu Bekdemir", "419 - Azra Geliç", "425 - Berk Emir Arıkan", "438 - Ecrin Ercan", "439 - Edip Yusuf Aydemir", "477 - Mira Su Ürentürk", "487 - Nazlı Ula", "488 - Nehir Armağan Bayır", "492 - Poyraz Ayçetin", "495 - Ramazan İsot", "499 - Semih Şentürk", "501 - Umut Yavaş", "508 - Zeynep Nisa Arancı"],
@@ -130,105 +206,320 @@
         "TEST": ["999 - Test Öğrencisi"]
     };
 
-    const firebaseConfig = { apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc", databaseURL: "https://odevtakipsistemi-b9fff-default-rtdb.europe-west1.firebasedatabase.app", projectId: "odevtakipsistemi-b9fff" };
+    const firebaseConfig = {
+      apiKey: "AIzaSyChlq2QkcalYkUm7LUW8fM1K2-SNVXmHBc",
+      authDomain: "odevtakipsistemi-b9fff.firebaseapp.com",
+      databaseURL: "https://odevtakipsistemi-b9fff-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "odevtakipsistemi-b9fff",
+      storageBucket: "odevtakipsistemi-b9fff.firebasestorage.app",
+      messagingSenderId: "354499388490",
+      appId: "1:354499388490:web:b2a53dba1dc8d5c20732b3"
+    };
+
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database(); const dbRef = db.ref('odevData');
+    const db = firebase.database();
+    const dbRef = db.ref('odevData');
 
-    let savedHistories = []; let pendingAssignments = []; let participationScores = {}; let announcements = [];
+    let savedHistories = []; 
+    let pendingAssignments = [];
+    let participationScores = {}; 
+    let announcements = [];
 
-    function linkYakalayici(metin) { if (!metin) return ""; var urlRegex = /(https?:\/\/[^\s]+)/g; return metin.replace(urlRegex, function(url) { return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: rgba(0,0,0,0.3); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);">Git 🔗</a>'; }); }
-    function calculateStreak(className, studentName) { let streak = 0; for(let i=0; i<savedHistories.length; i++) { let r = savedHistories[i]; if(r.className === className) { let asgn = r.assignment || ""; if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) { let s = r.details.find(x => x.name === studentName); if(s && !s.isAbsent) { if(s.isDone) streak++; else break; } } } } return streak; }
-    function getVeliStreakBadge(streak) { if (streak >= 5) return `<div style="font-size:14px; font-weight:700; color:#FFD700; margin-top:8px;">🔥 ${streak} Ödevlik Seri!</div>`; return ''; }
+    function linkYakalayici(metin) {
+        if (!metin) return "";
+        var urlRegex = /(https?:\/\/[^\s]+)/g;
+        return metin.replace(urlRegex, function(url) {
+            return '<br><a href="' + url + '" target="_blank" style="display: inline-block; margin-top: 8px; padding: 6px 12px; background: rgba(0,0,0,0.3); color: white; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2);" onclick="event.stopPropagation();">Git 🔗</a>';
+        });
+    }
+
+    function calculateStreak(className, studentName) {
+        let streak = 0;
+        for(let i=0; i<savedHistories.length; i++) {
+            let r = savedHistories[i];
+            if(r.className === className) {
+                let asgn = r.assignment || "";
+                if(!asgn.includes('EKSİK') && !asgn.includes('MATERYAL')) {
+                    let s = r.details.find(x => x.name === studentName);
+                    if(s && !s.isAbsent) {
+                        if(s.isDone) streak++;
+                        else break;
+                    }
+                }
+            }
+        }
+        return streak;
+    }
+
+    function getVeliStreakBadge(streak) {
+        if (streak >= 20) return `<div style="font-size:14px; font-weight:700; color:#FFD700; margin-top:8px; background:rgba(255, 215, 0, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(255,215,0,0.3); box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);">👑 ${streak} Efsanevi Seri!</div>`;
+        if (streak >= 10) return `<div style="font-size:14px; font-weight:700; color:#00E5FF; margin-top:8px; background:rgba(0, 229, 255, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(0,229,255,0.3); box-shadow: 0 4px 10px rgba(0, 229, 255, 0.2);">💎 ${streak} Elmas Seri!</div>`;
+        if (streak >= 5) return `<div style="font-size:14px; font-weight:700; color:#FFEA00; margin-top:8px; background:rgba(255, 234, 0, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(255,234,0,0.3); box-shadow: 0 4px 10px rgba(255, 234, 0, 0.2);">⭐ ${streak} Yıldız Seri!</div>`;
+        if (streak >= 3) return `<div style="font-size:14px; font-weight:700; color:var(--warning); margin-top:8px; background:rgba(255, 159, 10, 0.15); display:inline-block; padding:6px 12px; border-radius:100px; border: 1px solid rgba(255,159,10,0.3); box-shadow: 0 4px 10px rgba(255, 159, 10, 0.2);">🔥 ${streak} Ödevlik Seri!</div>`;
+        return '';
+    }
 
     window.onload = function() { checkParentStatus(); };
 
-    function checkParentStatus() { 
-        let pData = localStorage.getItem('parentStudent'); 
+    function checkParentStatus() {
+        let pData = localStorage.getItem('parentStudent');
         if (pData) { 
-            pData = JSON.parse(pData); 
+            pData = JSON.parse(pData);
             document.getElementById('screen-parent-setup').style.display = 'none'; 
             document.getElementById('screen-parent-dashboard').style.display = 'block'; 
-            document.getElementById('logoutBtn').style.display = 'flex'; 
+            document.getElementById('logoutBtn').style.display = 'flex';
             startSync(); 
-        } else { 
+        } 
+        else { 
             document.getElementById('screen-parent-setup').style.display = 'block'; 
             document.getElementById('screen-parent-dashboard').style.display = 'none'; 
-            document.getElementById('syncStatus').style.display = 'none'; 
-            document.getElementById('logoutBtn').style.display = 'none'; 
-        } 
+            document.getElementById('syncStatus').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+        }
     }
-    
-    function logoutParent() { if(confirm("Bağlantıyı kesmek istiyor musunuz?")) { localStorage.removeItem('parentStudent'); location.reload(); } }
-    
-    function loadParentSetupStudents() { 
-        var cls = document.getElementById('parentSetupClass').value; 
-        var stuSelect = document.getElementById('parentSetupStudent'); 
-        
-        stuSelect.innerHTML = '<option value="" disabled selected>Öğrenci Seçiniz...</option>'; 
+
+    function logoutParent() {
+        if(confirm("Bağlantıyı kesmek ve bilgilerinizi yeniden girmek istiyor musunuz?")) {
+            localStorage.removeItem('parentStudent');
+            location.reload();
+        }
+    }
+
+    function loadParentSetupStudents() {
+        const cls = document.getElementById('parentSetupClass').value; 
+        const stuSelect = document.getElementById('parentSetupStudent'); 
+        stuSelect.innerHTML = '<option value="" disabled selected>Öğrenci Seçiniz...</option>';
         
         if(cls && classData[cls]) { 
-            classData[cls].forEach(function(s) { 
-                var opt = document.createElement('option'); 
+            classData[cls].forEach(s => { 
+                const opt = document.createElement('option'); 
                 opt.value = s; 
                 opt.innerHTML = s; 
                 stuSelect.appendChild(opt); 
             }); 
+            stuSelect.disabled = false;
+            stuSelect.removeAttribute('disabled'); 
+        } else {
+            stuSelect.disabled = true;
+            stuSelect.setAttribute('disabled', 'disabled');
         }
     }
     
-    function saveParentSetup() { 
-        var cls = document.getElementById('parentSetupClass').value; 
-        var stu = document.getElementById('parentSetupStudent').value; 
-        var pName = document.getElementById('parentNameInput').value.trim(); 
-        
-        if(!cls || !stu) return alert("Lütfen Sınıf ve Öğrenci seçin!"); 
-        if(!pName) return alert("Lütfen Veli adını girin!"); 
-        
-        document.getElementById('loadingOverlay').style.display = 'flex'; 
-        setTimeout(function() { 
-            document.getElementById('loadingOverlay').style.display = 'none'; 
-            localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
-            checkParentStatus(); 
-        }, 1000); 
+    function saveParentSetup() {
+        const cls = document.getElementById('parentSetupClass').value; 
+        const stu = document.getElementById('parentSetupStudent').value;
+        const pName = document.getElementById('parentNameInput').value.trim();
+
+        if(!cls || !stu) return alert("Lütfen sınıf ve öğrenci seçin!");
+        if(!pName) return alert("Lütfen veli adını ve soyadını girin!");
+
+        if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrencinin verilerini okumak için kilitlenecektir. Onaylıyor musunuz?")) {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            db.ref('odevData/parentConnections').once('value').then((snapshot) => {
+                let connections = snapshot.val() || [];
+                let exists = connections.find(c => c.className === cls && c.studentName === stu && c.parentName === pName);
+                if (!exists) {
+                    connections.push({className: cls, studentName: stu, parentName: pName, date: new Date().toLocaleDateString('tr-TR')});
+                    db.ref('odevData/parentConnections').set(connections);
+                }
+                setTimeout(function() { 
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    localStorage.setItem('parentStudent', JSON.stringify({className: cls, studentName: stu, parentName: pName})); 
+                    checkParentStatus();
+                }, 1500);
+            }).catch(err => {
+                alert("Bağlantı hatası! Lütfen internetinizi kontrol edin.");
+                document.getElementById('loadingOverlay').style.display = 'none';
+            });
+        }
     }
 
-    function startSync() { document.getElementById('syncStatus').style.display = 'inline-block'; document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>'; dbRef.on('value', (snapshot) => { if (snapshot.exists()) { var data = snapshot.val(); savedHistories = data.history || []; pendingAssignments = data.pending || []; participationScores = data.scores || {}; announcements = data.announcements || []; renderParentDashboard(); } }); }
+    function startSync() { 
+        document.getElementById('syncStatus').style.display = 'inline-block';
+        document.getElementById('syncStatus').innerHTML = '<span class="live-indicator"></span>'; 
+        
+        dbRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+                var data = snapshot.val();
+                savedHistories = data.history || []; 
+                pendingAssignments = data.pending || []; 
+                participationScores = data.scores || {}; 
+                announcements = data.announcements || [];
+                
+                if (document.getElementById('screen-parent-dashboard').style.display === 'block') {
+                    renderParentDashboard(); 
+                }
+            }
+        });
+    }
 
     function renderParentDashboard() {
         let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
         const className = pData.className; const studentName = pData.studentName; const container = document.getElementById('parentDashboardContainer');
         
-        // İŞTE BÜTÜN SORUNU KÖKTEN ÇÖZEN O KISACIK KOD! Şifre yok, base64 yok. Sadece sınıf ve numara: (Örn: 5B_138)
-        let studentId = studentName.split(' - ')[0];
-        let telegramPayload = className + "_" + studentId;
-        
         let html = ''; let total = 0; let doneCount = 0; let matIssues = 0;
-        for(let i=0; i<savedHistories.length; i++) { const record = savedHistories[i]; if(record.className === className) { let studentDetail = record.details.find(s => s.name === studentName); if (studentDetail) { let asgRaw = record.assignment || ""; let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL"); let asg = linkYakalayici(asgRaw); if(!isMaterial) { if(!studentDetail.isAbsent) { total++; if (studentDetail.isDone) doneCount++; } } else if (!studentDetail.isDone) { matIssues++; } let bgClass = ""; let icon = ""; let lbl = ""; if (isMaterial && !studentDetail.isDone) { bgClass = "history-eksik"; icon = "❌"; } else if (!isMaterial) { if (studentDetail.isAbsent) { bgClass = "history-yok"; icon = "➖"; } else if (studentDetail.isDone) { bgClass = "history-yapti"; icon = "✅"; } else { bgClass = "history-eksik"; icon = "❌"; } } if(bgClass !== "") { html += `<div class='history-item-modern ${bgClass}'><div class='history-left-modern'><div class='history-date-modern'>${record.date}</div><div class='history-subject-modern'>${asg}</div></div><div class='history-right-modern'>${icon}</div></div>`; } } } }
 
-        let annHtml = ''; let myAnns = announcements.filter(a => { if(a.targetClasses) return a.targetClasses.includes(className) || a.targetClasses.includes('TÜMÜ'); return false; }).reverse();
-        if(myAnns.length > 0) { annHtml = `<div class="announcements-slider">`; myAnns.forEach((a, index) => { let isLatest = (index === 0) ? 'latest' : ''; annHtml += `<div class="announcement-card ${isLatest}"><div style="font-weight:bold; color:#fff; font-size:13px; margin-bottom:8px;">📢 DUYURU ${myAnns.length - index}</div><div style="font-size:15px; font-weight:600;">${linkYakalayici(a.message)}</div><div style="font-size:11px; margin-top:10px;">🕒 ${a.date}</div></div>`; }); annHtml += `</div>`; }
+        for(let i=0; i<savedHistories.length; i++) {
+            const record = savedHistories[i];
+            if(record.className === className) {
+                let studentDetail = record.details.find(s => s.name === studentName);
+                if (studentDetail) {
+                    let asgRaw = record.assignment || "";
+                    let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL");
+                    let asg = linkYakalayici(asgRaw); 
+                    
+                    if(!isMaterial) { 
+                        if(!studentDetail.isAbsent) {
+                            total++; 
+                            if (studentDetail.isDone) doneCount++; 
+                        }
+                    } 
+                    else if (!studentDetail.isDone) { matIssues++; }
+                    
+                    let bgClass = ""; let icon = ""; let lbl = "";
+
+                    if (isMaterial && !studentDetail.isDone) {
+                        bgClass = "history-eksik"; icon = "❌";
+                    } else if (!isMaterial) {
+                        if (studentDetail.isAbsent) {
+                            bgClass = "history-yok"; icon = "➖";
+                            lbl = " <span style='font-size:12px; font-weight:normal; opacity:0.9;'>(Devamsız)</span>";
+                        } else if (studentDetail.isDone) {
+                            bgClass = "history-yapti"; icon = "✅";
+                        } else {
+                            bgClass = "history-eksik"; icon = "❌";
+                        }
+                    }
+
+                    if(bgClass !== "") {
+                        html += `<div class='history-item-modern ${bgClass}'>
+                            <div class='history-left-modern'>
+                                <div class='history-date-modern'>${record.date}</div>
+                                <div class='history-subject-modern'>${asg}${lbl}</div>
+                            </div>
+                            <div class='history-right-modern'>${icon}</div>
+                        </div>`;
+                    }
+                }
+            }
+        }
+
+        let annHtml = '';
+        let myAnns = announcements.filter(a => {
+            if(a.targetClasses) {
+                return a.targetClasses.includes(className) || a.targetClasses.includes('TÜMÜ');
+            } else if (a.className) {
+                return a.className === className || a.className === 'TÜMÜ';
+            }
+            return false;
+        }).reverse();
+
+        if(myAnns.length > 0) {
+            annHtml = `<div class="announcements-slider">`;
+            myAnns.forEach((a, index) => {
+                let isLatest = (index === 0) ? 'latest' : '';
+                annHtml += `
+                <div class="announcement-card ${isLatest}">
+                    <div style="font-weight:bold; color:#fff; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:16px;">📢</span> DUYURU ${myAnns.length - index}
+                    </div>
+                    <div style="font-size:15px; font-weight:600; color:#fff; line-height:1.4; max-height: 90px; overflow-y: auto;">${linkYakalayici(a.message)}</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:10px;">🕒 ${a.date}</div>
+                </div>`;
+            });
+            annHtml += `</div>`;
+        }
+
+        const now = new Date(); const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        let pendingHtml = '';
+        let pendingCount = 0; let sortedPending = [...pendingAssignments].sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
+        
+        sortedPending.forEach(p => {
+            if (p.className === className) {
+                pendingCount++;
+                let isTodayOrPast = p.dueDate <= todayStr;
+                let boxClass = isTodayOrPast ? 'box-red' : 'box-yellow';
+                let icon = isTodayOrPast ? '🚨' : '⏳';
+                let dParts = p.dueDate.split('-'); let displayDate = `${dParts[2]}.${dParts[1]}.${dParts[0]}`;
+                pendingHtml += `<div class="assignment-box ${boxClass}"><div class="box-date"><span>${icon} ${displayDate}</span></div><div class="box-title">${linkYakalayici(p.assignment)}</div></div>`;
+            }
+        });
+        
+        let pendingSection = pendingCount > 0 ? `<div class='glass-header'>📌 Yaklaşan Ödevler</div><div id="homeReminderList">${pendingHtml}</div>` : "";
+        const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
+
+        let streak = calculateStreak(className, studentName);
+        let streakIcon = getVeliStreakBadge(streak);
 
         let pScore = (participationScores[className] && participationScores[className][studentName]) ? participationScores[className][studentName] : 0;
-        const cleanName = studentName.split(' - ').length > 1 ? studentName.split(' - ')[1] : studentName;
-        let streakIcon = getVeliStreakBadge(calculateStreak(className, studentName));
 
-        container.innerHTML = `${annHtml}
-        <div style="text-align:center; margin-bottom:30px; padding-top:10px;">
-            <div style="font-size:64px; margin-bottom:10px;">👤</div>
-            <h2 style="margin:0; color:var(--text-main); font-size:28px;">${cleanName}</h2>
-            <p style="color:rgba(255,255,255,0.7); margin:6px 0 0 0;">${className} Sınıfı</p>
-            ${streakIcon}
+        if (total === 0 && pendingCount === 0 && matIssues === 0 && pScore === 0) { 
+            container.innerHTML = `${annHtml}<div style="text-align:center; margin-bottom:20px; padding-top:20px;"><div style="font-size:64px; margin-bottom:10px;">👤</div><h2 style="margin:0; color:var(--text-main); font-size:26px;">${cleanName}</h2><p style="color:var(--primary); margin:6px 0 0 0; font-size:15px; font-weight:600;">${className} Sınıfı</p></div><div class="glass-panel" style="text-align: center; color: var(--text-muted); padding: 40px 20px;">Öğrenciye ait henüz bir kayıt bulunmuyor.</div>`; 
+        } else {
+            const rate = total === 0 ? 0 : Math.round((doneCount / total) * 100);
             
-            <div style="margin-top:16px;">
-                <a href="https://t.me/${BOT_KULLANICI_ADI}?start=${telegramPayload}" 
-                   target="_blank" 
-                   style="display:inline-flex; align-items:center; gap:8px; background:#24A1DE; color:white; padding:10px 18px; border-radius:100px; text-decoration:none; font-size:13px; font-weight:700; box-shadow:0 4px 15px rgba(36, 161, 222, 0.4);">
-                    <span style="font-size: 16px;">🔔</span> Telegram Bildirimlerini Aktif Et
-                </a>
+            let matWarning = matIssues > 0 ? `<div class="glass-panel" style="border:1px solid rgba(255, 69, 58, 0.4); background:rgba(255, 69, 58, 0.15);"><h3 style="margin:0; color: #FFF; font-size:15px; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">⚠️ DİKKAT: ${matIssues} Adet Materyal Eksiği Var!</h3></div>` : "";
+            
+            let statsHtml = `
+            <div class="dashboard-grid-modern">
+                <div class='stat-card-modern stat-avg'>
+                    <div class='stat-label-modern'>Ödev Oranı</div>
+                    <div class='stat-value-modern'>%${rate}</div>
+                </div>
+                <div class='stat-card-modern stat-pnt'>
+                    <div class='stat-label-modern'>Katılım Puanı</div>
+                    <div class='stat-value-modern'>${pScore > 0 ? '+'+pScore : pScore}</div>
+                </div>
+            </div>`;
+
+            let studentHistory = [];
+            savedHistories.forEach(r => {
+                if(r.className === className && !r.assignment.includes('EKSİK') && !r.assignment.includes('MATERYAL')) {
+                    let s = r.details.find(x => x.name === studentName);
+                    if(s) studentHistory.push({ date: r.date, isDone: s.isDone, isAbsent: s.isAbsent });
+                }
+            });
+            studentHistory = studentHistory.slice(0, 5).reverse();
+
+            let chartHtml = `<div class="glass-panel" style="margin-top:24px;">
+                <div class="glass-header" style="margin-top:0; justify-content:center;">📈 Son 5 Görev Trendi</div>
+                <div style="display:flex; align-items:flex-end; justify-content:space-around; height:120px; padding-top:15px; gap:8px; border-bottom:1px solid rgba(255,255,255,0.1);">`;
+            
+            if(studentHistory.length === 0) {
+                chartHtml += `<div style="width:100%; text-align:center; color:var(--text-muted); font-size:13px; align-self:center;">Henüz veri yok.</div>`;
+            } else {
+                studentHistory.forEach(h => {
+                    let hColor = h.isAbsent ? 'var(--warning)' : (h.isDone ? 'var(--success)' : 'var(--danger)');
+                    let hHeight = h.isAbsent ? '50%' : (h.isDone ? '100%' : '15%');
+                    let icon = h.isAbsent ? '➖' : (h.isDone ? '✅' : '❌');
+                    chartHtml += `<div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+                        <div style="font-size:14px; margin-bottom:4px;">${icon}</div>
+                        <div style="width:100%; max-width:35px; height:${hHeight}; background:${hColor}; border-radius:6px 6px 0 0; opacity:0.85; box-shadow:0 0 10px ${hColor}; transition: height 1s ease;"></div>
+                    </div>`;
+                });
+            }
+            chartHtml += `</div>
+                <div style="display:flex; justify-content:space-around; margin-top:8px;">`;
+            studentHistory.forEach(h => {
+                chartHtml += `<div style="font-size:9px; color:rgba(255,255,255,0.6);">${h.date.substring(0,5)}</div>`;
+            });
+            chartHtml += `</div></div>`;
+
+            container.innerHTML = `${annHtml}
+            <div style="text-align:center; margin-bottom:30px; padding-top:10px;">
+                <div style="font-size:64px; margin-bottom:10px; filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.3));">👤</div>
+                <h2 style="margin:0; color:var(--text-main); font-size:28px; letter-spacing:-0.5px;">${cleanName}</h2>
+                <p style="color:rgba(255,255,255,0.7); margin:6px 0 0 0; font-size:15px; font-weight:500;">${className} Sınıfı Raporu</p>
+                ${streakIcon}
             </div>
-        </div>
-        <div class="dashboard-grid-modern"><div class='stat-card-modern stat-avg'><div class='stat-label-modern'>Ödev Oranı</div><div class='stat-value-modern'>%${total === 0 ? 0 : Math.round((doneCount / total) * 100)}</div></div><div class='stat-card-modern stat-pnt'><div class='stat-label-modern'>Katılım Puanı</div><div class='stat-value-modern'>${pScore > 0 ? '+'+pScore : pScore}</div></div></div>
-        <div class='glass-header'>✅ Kontrol Geçmişi</div><div class="history-list-modern">${html || '<div style="text-align:center; color:gray;">Kayıt bulunamadı.</div>'}</div>`;
+            ${statsHtml}
+            ${chartHtml}
+            ${matWarning}
+            ${pendingSection}
+            <div class='glass-header'>✅ Kontrol Geçmişi</div>
+            <div class="history-list-modern">${html}</div>`;
+        }
     }
 </script>
 </body>

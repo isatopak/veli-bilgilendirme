@@ -37,7 +37,6 @@
         .glass-panel { background-color: var(--surface); backdrop-filter: blur(25px); border-radius: 24px; padding: 24px; margin-bottom: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); }
         .setup-icon-amblem { font-size: 54px; display: flex; align-items: center; justify-content: center; width: 110px; height: 110px; border-radius: 30px; background: var(--ios-dark-gradient); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); margin: 0 auto 24px auto; }
         
-        /* TAMAMEN NATIVE (TELEFONUN KENDİ) MENÜSÜ - DONMA YAPMAZ */
         .form-group { margin-bottom: 16px; text-align: left; }
         .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #FFFFFF; text-transform: uppercase; }
         input, select { 
@@ -46,7 +45,6 @@
         }
         select option { background-color: #2C2C2E; color: #FFFFFF; font-size: 16px; }
         input::placeholder { color: rgba(255,255,255,0.5); }
-        /* -------------------------- */
 
         .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: #FFF; background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);}
         
@@ -162,7 +160,6 @@
     
     function logoutParent() { if(confirm("Bağlantıyı kesmek istiyor musunuz?")) { localStorage.removeItem('parentStudent'); location.reload(); } }
     
-    // YENİ, TERTEMİZ FONKSİYON: disabled ZORLAMASI YOK!
     function loadParentSetupStudents() { 
         var cls = document.getElementById('parentSetupClass').value; 
         var stuSelect = document.getElementById('parentSetupStudent'); 
@@ -201,7 +198,9 @@
         let pData = localStorage.getItem('parentStudent'); if(!pData) return; pData = JSON.parse(pData);
         const className = pData.className; const studentName = pData.studentName; const container = document.getElementById('parentDashboardContainer');
         
-        let telegramPayload = btoa(unescape(encodeURIComponent(className + "___" + studentName))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        // İŞTE BÜTÜN SORUNU KÖKTEN ÇÖZEN O KISACIK KOD! Şifre yok, base64 yok. Sadece sınıf ve numara: (Örn: 5B_138)
+        let studentId = studentName.split(' - ')[0];
+        let telegramPayload = className + "_" + studentId;
         
         let html = ''; let total = 0; let doneCount = 0; let matIssues = 0;
         for(let i=0; i<savedHistories.length; i++) { const record = savedHistories[i]; if(record.className === className) { let studentDetail = record.details.find(s => s.name === studentName); if (studentDetail) { let asgRaw = record.assignment || ""; let isMaterial = asgRaw.includes("EKSİK") || asgRaw.includes("MATERYAL"); let asg = linkYakalayici(asgRaw); if(!isMaterial) { if(!studentDetail.isAbsent) { total++; if (studentDetail.isDone) doneCount++; } } else if (!studentDetail.isDone) { matIssues++; } let bgClass = ""; let icon = ""; let lbl = ""; if (isMaterial && !studentDetail.isDone) { bgClass = "history-eksik"; icon = "❌"; } else if (!isMaterial) { if (studentDetail.isAbsent) { bgClass = "history-yok"; icon = "➖"; } else if (studentDetail.isDone) { bgClass = "history-yapti"; icon = "✅"; } else { bgClass = "history-eksik"; icon = "❌"; } } if(bgClass !== "") { html += `<div class='history-item-modern ${bgClass}'><div class='history-left-modern'><div class='history-date-modern'>${record.date}</div><div class='history-subject-modern'>${asg}</div></div><div class='history-right-modern'>${icon}</div></div>`; } } } }

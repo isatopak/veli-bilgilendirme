@@ -30,11 +30,10 @@
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* BEYAZ EKRAN SEKME SORUNUNUN ÇÖZÜMÜ BURADA */
         html {
-            background-color: #1e1e24; /* Varsayılan arka planı koyu yapar */
+            background-color: #1e1e24; 
             height: 100%;
-            overscroll-behavior-y: none; /* Sayfanın aşağı-yukarı sekmesini kilitler */
+            overscroll-behavior-y: none; 
         }
 
         body { 
@@ -48,7 +47,7 @@
             margin: 0 auto; 
             min-height: 100vh; 
             position: relative; 
-            overscroll-behavior-y: none; /* Body için de ekstra güvenlik */
+            overscroll-behavior-y: none; 
         }
 
         @keyframes gradientBG {
@@ -512,6 +511,15 @@
                 <h2 style="margin:0; color:var(--text-main); font-size:28px; letter-spacing:-0.5px;">${cleanName}</h2>
                 <p style="color:rgba(255,255,255,0.7); margin:6px 0 0 0; font-size:15px; font-weight:500;">${className} Sınıfı Raporu</p>
                 ${streakIcon}
+                
+                <div style="margin-top:16px;">
+                    <a href="https://t.me/EsenkentIngilizce_bot?start=${className}___${studentName.replace(/ /g, '_')}" 
+                       target="_blank" 
+                       style="display:inline-flex; align-items:center; gap:8px; background:#24A1DE; color:white; padding:10px 18px; border-radius:100px; text-decoration:none; font-size:13px; font-weight:700; box-shadow:0 4px 15px rgba(36, 161, 222, 0.4);">
+                        <span style="font-size: 16px;">🔔</span>
+                        <span>Telegram Bildirimlerini Aktif Et</span>
+                    </a>
+                </div>
             </div>
             ${statsHtml}
             ${chartHtml}

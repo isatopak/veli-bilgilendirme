@@ -173,7 +173,11 @@
                     <label>Sınıf Seçiniz</label>
                     <select id="parentSetupClass" onchange="loadParentSetupStudents()">
                         <option value="" disabled selected>Lütfen Seçin...</option>
-                        <option value="5B">5B</option><option value="5C">5C</option><option value="5D">5D</option><option value="5E">5E</option><option value="5YDA">5YDA</option><option value="6A">6A</option><option value="7E">7E</option><option value="TEST">TEST</option>
+                        <option value="5E">5E</option>
+                        <option value="6B">6B</option>
+                        <option value="7A">7A</option>
+                        <option value="5YDA">5YDA</option>
+                        <option value="6YDA">6YDA</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -195,14 +199,41 @@
 
 <script>
     const classData = {
-        "5B": ["103 - Bekirhan Veziroğlu", "119 - Berfin Ocak", "138 - Ece Nur Macit", "195 - Eymen Akyol", "216 - Hüseyin Metin Ünlü", "228 - Mehmet Ali Acar", "229 - Mehmet Boran Şengül", "282 - Münür Eldemir", "292 - Ömer Toprak Kurubal", "311 - Zeynep Sena İlçin", "343 - Doruk Ateş", "351 - Feyza Kuruçay", "363 - Hüseyin Kayra Demir", "366 - Çınar Gülseren", "367 - Elif Sare Korkut", "415 - Asya Gökmen", "420 - Begüm Güldiken", "428 - Buğra Çınar", "430 - Büşranur Kapucu", "452 - Emir Talha Zengin", "475 - Melinay Perçin", "485 - Muhammet Yunus Ünal", "496 - Ramazan Kağan Kaya", "510 - Erşan Ali Yücel", "511 - Melisa Nur Kutlu", "512 - Efe Can Sukan", "542 - Erva Öztürk"],
-        "5C": ["36 - Ada Temoçin", "88 - Badenur Kaya", "128 - Buğlem Altındaş", "135 - Defne Aktaş", "198 - Gamzenur Yıldız", "224 - Kerem Talha Akyıldız", "246 - Mehmet Timur Yalçın", "262 - Miraç Ege Taşhan", "263 - Miran Durma", "265 - Muhammed Arif Kavaklı", "307 - Solin Rohiv Görür", "344 - Ömer Kayra Mutlu", "355 - Timur Ula", "373 - Seyit Ali Şahin", "413 - Zeynep Cansu Bekdemir", "419 - Azra Geliç", "425 - Berk Emir Arıkan", "438 - Ecrin Ercan", "439 - Edip Yusuf Aydemir", "477 - Mira Su Ürentürk", "487 - Nazlı Ula", "488 - Nehir Armağan Bayır", "492 - Poyraz Ayçetin", "495 - Ramazan İsot", "499 - Semih Şentürk", "501 - Umut Yavaş", "508 - Zeynep Nisa Arancı"],
-        "5D": ["87 - Ayşegül Altunyuva", "116 - Berat Kurubal", "118 - Belinay Sarıbulak", "137 - Derin Mebrule Alper", "187 - Eyüp Arda Karabulut", "222 - Furkan Yakupoğlu", "289 - Nazlı Çevik", "291 - Kaan Efe Keten", "360 - Elif Kocaman", "376 - Yusuf Buğra Demirci", "390 - Adanaz Gezer", "414 - Asrın Kurşun", "417 - Ayaz Aksoy", "440 - Ege Özel", "464 - Hümeyra Nas Baloğlu", "466 - Tuana Dundar", "490 - Osman Meral", "493 - Poyraz Karamuk", "498 - Rumeysa Akdemir", "504 - Yağmur Hilal Geçmez", "507 - Zehra Şenses", "541 - Çağrı Karapınar", "543 - Gönül Keleş"],
-        "5E": ["52 - Afşin Kuruca", "142 - Ela Nur Yıldız", "159 - Elif İlhan", "165 - Erva Acar", "169 - Eslimnur Kaya", "170 - Esma Çakal", "179 - Hira Elif Kartal", "201 - Hasan Etem Kurubal", "210 - Hira Sena Üzel", "269 - Muhammed Miraç Şirin", "278 - Murat Yıldız", "286 - Nasuh Buğra Yılmaz", "299 - Özgün Ada Erol", "313 - Muhammed Eymen Aslan", "319 - Ömer Sefa Gündüz", "328 - Elif Naz Gedik", "333 - Eda Nil Gedik", "357 - Eylül Çalışkan", "395 - Muhammet Talha Örün", "408 - Ali Kemal Aydoğdu", "421 - Selim Yıldırım", "448 - Elifnaz Akgül", "449 - Talha Karaca", "469 - Kaan Demir", "489 - Neslihan İşcan", "513 - Taha Tatay"],
-        "5YDA": ["124 - Berkay Karagöz", "189 - Çınar Ali Demir", "209 - Sevgi Şener", "433 - Derin Somer", "451 - Emir Diler", "216 - Hüseyin Metin Ünlü", "292 - Ömer Toprak Kurubal", "363 - Hüseyin Kayra Demir", "415 - Asya Gökmen", "428 - Buğra Çınar", "475 - Melinay Perçin", "246 - Mehmet Timur Yalçın", "373 - Seyit Ali Şahin", "499 - Semih Şentürk", "501 - Umut Yavaş", "116 - Berat Kurubal", "414 - Asrın Kurşun", "440 - Ege Özel", "466 - Tuana Dündar", "170 - Esma Çakal", "408 - Ali Kemal Aydoğdu", "59 - Ahsen Ece Özbek", "75 - Almira Aydın", "111 - Bengü Kılıç", "153 - Elif İkra Bektaş", "202 - Hilal Erva Kurubal", "312 - Efecan Halitoğulları", "410 - Zehra Karabulut", "422 - Beren Dere", "494 - Poyraz Kartal"],
-        "6A": ["2 - Ahmet Ayaz Altıntaş", "4 - Ahmet Dere", "5 - Anıl Ergin Aksoy", "11 - Ayaz Nergiz", "14 - Can Karakaya", "17 - Çınar Yüce", "30 - Derin Eren", "35 - Dilara Aydın", "48 - Ela Nur Özbek", "62 - Ezgi Özenses", "63 - Nas Maya Kurubal", "70 - Rüzgar Can", "73 - Saliha Uysal", "84 - Selen Özdemir", "91 - Umut Bozkurt", "93 - Yiğit Er", "94 - Yusuf Hamza Özbek", "96 - Zeynep Balta", "102 - Zeynep Kalender", "105 - İlkim Nehir Tepe", "107 - Ekin Fırat Koç", "109 - Serin Üzel", "125 - Rüzgar İnan Şık", "126 - Nisa Yağmur Ülker", "127 - Eslem Nisa Altındaş", "140 - Ata Can Özdemir", "147 - Sare Karabulut", "238 - Elif Bahar Ceylan", "370 - Solin Deniz Koçin", "389 - Yusuf Uras Kılıç"],
-        "7E": ["34 - Arin Eray Erdoğan", "53 - Mert Ali Balta", "60 - Beyza Gül Kalyon", "69 - Ahmet Ediz Arısoy", "101 - Asenat Aras", "112 - Barış Kazankaya", "161 - Hayrunnisa Toraman", "230 - Muhammed Mahmudov", "247 - Eda Ece Balyemez", "284 - Hafsa Öçal", "340 - Sinem Gül", "341 - Sudenaz Gürsoy", "342 - Sümeyye Kadem Işık", "345 - Tuana Şahin", "348 - Yağız Kaya", "364 - Yusuf Kuzey Özdemir", "365 - Yusuf Özkan Koç", "368 - Tolgahan Paslı", "441 - Dila Taşdemir", "693 - Mustafa Özgür Kütük", "884 - Fadime Eldemir"],
-        "TEST": ["999 - Test Öğrencisi"]
+        "5E": [
+            "278 - MURAT YILDIZ", "327 - NUH İŞLER", "505 - DENİZ YILMAZ", "604 - AHMET ASAF GÜNDÜZ", "613 - ASENA LEKESİZ", 
+            "623 - BELİNAY KAYA", "627 - BERAT ÖZTÜRK", "631 - BEYZA NUR İNALKAÇ", "640 - DILGEŞ MED GÜCİN", "649 - ELİF MİRA SOLAK", 
+            "658 - EREN BEKTAŞ", "662 - ERVA TUNCAY", "664 - ESİLA ÖZCAN", "669 - EYLÜL ÖZDEMİR", "674 - EYMEN ÖZTÜRK", 
+            "676 - FATMA ZEHRA YURDİGÜL", "694 - İBRAHİM MUSTAFA KAYA", "696 - İDİL YILDIRIM", "700 - ATLAS TOPCU", "712 - MELEK İNALKAÇ", 
+            "716 - MİRAÇ BERK ÖZTÜRK", "717 - MİRAÇ ÖZBEK", "729 - MUSTAFA ERAY HAYLA", "736 - NİYAZİ KERİM ALTUNYUVA", "744 - ÖMER MERT TARANDIR", 
+            "761 - UMUT AYAZ ADAK", "765 - YAĞIZ KAAN BAYHAN", "766 - YAĞMUR BERİL ALPER", "784 - DERİN DOĞAN"
+        ],
+        "6B": [
+            "103 - BEKİRHAN VEZİROĞLU", "119 - BERFİN OCAK", "138 - ECE NUR MACİT", "195 - EYMEN AKYOL", "216 - HÜSEYİN METİN ÜNLÜ", 
+            "228 - MEHMET ALİ ACAR", "229 - MEHMET BORAN ŞENGÜL", "253 - UĞUR ERMİŞ", "282 - MÜNÜR ELDEMİR", "292 - ÖMER TOPRAK KURUBAL", 
+            "311 - ZEYNEP SENA İLÇİN", "343 - DORUK ATEŞ", "351 - FEYZA KURUÇAY", "363 - HÜSEYİN KAYRA DEMİR", "366 - ÇINAR GÜLSEREN", 
+            "367 - ELİF SARE KORKUT", "415 - ASYA GÖKMEN", "420 - BEGÜM GÜLDİKEN", "428 - BUĞRA ÇINAR", "430 - BÜŞRANUR KAPUCU", 
+            "452 - EMİR TALHA ZENGİN", "475 - MELİNAY PERÇİN", "485 - MUHAMMET YUNUS ÜNAL", "496 - RAMAZAN KAĞAN KAYA", "510 - ERŞAN ALİ YÜCEL", 
+            "511 - MELİSA NUR KUTLU", "512 - EFE CAN SUKAN", "542 - ERVA ÖZTÜRK"
+        ],
+        "7A": [
+            "2 - AHMET AYAZ ALTINTAŞ", "4 - AHMET DERE", "5 - ANIL ERGİN AKSOY", "11 - AYAZ NERGİZ", "14 - CAN KARAKAYA", 
+            "17 - ÇINAR YÜCE", "30 - DERİN EREN", "35 - DİLARA AYDIN", "48 - ELA NUR ÖZBEK", "62 - EZGİ ÖZENSES", 
+            "63 - NAS MAYA KURUBAL", "70 - RÜZGAR CAN", "73 - SALİHA UYSAL", "84 - SELEN ÖZDEMİR", "91 - UMUT BOZKURT", 
+            "93 - YİĞİT ER", "94 - YUSUF HAMZA ÖZBEK", "96 - ZEYNEP BALTA", "102 - ZEYNEP KALENDER", "107 - EKİN FIRAT KOÇ", 
+            "109 - SERİN ÜZEL", "125 - RÜZGAR İNAN ŞIK", "126 - NİSA YAĞMUR ÜLKER", "127 - ESLEM NİSA ALTINDAŞ", "140 - ATA CAN ÖZDEMİR", 
+            "147 - SARE KARABULUT", "238 - ELİF BAHAR CEYLAN", "370 - SOLİN DENİZ KOÇİN", "389 - YUSUF URAS KILIÇ"
+        ],
+        "5YDA": [
+            "701 - DURU KURUBAL", "706 - YUSUF AKTÜRK", "795 - ELİF BELİNAY KARAGÖZ", "337 - ELİF CEYLİN SARI", "702 - GÖKÇE MERYEM KÖSE", 
+            "704 - ÖMER ASAF ÖZTÜRK", "703 - KUMSAL ERDÖNMEZ", "699 - ADASU ÇAKIR", "705 - ÖMER GEDİK", "708 - ERVA GÜRGÖL", 
+            "700 - ATLAS TOPCU", "658 - EREN BEKTAŞ", "745 - ÖZGÜR DENİZ KALKAN", "618 - AYDIN TUĞRA ÇİFTÇİ", "614 - ASRIN ATAKAN DEMİR", 
+            "777 - ZEYNEP ÖZBEK", "649 - ELİF MİRA SOLAK", "603 - AFFAN ŞAKİR SÖNMEZ"
+        ],
+        "6YDA": [
+            "209 - SEVGİ ŞENER", "292 - ÖMER TOPRAK KURUBAL", "363 - HÜSEYİN KAYRA DEMİR", "428 - BUĞRA ÇINAR", "440 - EGE ÖZEL", 
+            "59 - AHSEN ECE ÖZBEK", "75 - ALMİRA AYDIN", "202 - HİLAL ERVA KURUBAL", "410 - ZEHRA KARABULUT", "433 - DERİN SOMER", 
+            "414 - ASRIN KURŞUN"
+        ]
     };
 
     const firebaseConfig = {
@@ -217,7 +248,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const dbRef = db.ref('odevData');
+    const dbRef = db.ref('odevData_2026');
 
     let savedHistories = []; 
     let pendingAssignments = [];
@@ -315,12 +346,12 @@
         if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrencinin verilerini okumak için kilitlenecektir. Onaylıyor musunuz?")) {
             document.getElementById('loadingOverlay').style.display = 'flex';
             
-            db.ref('odevData/parentConnections').once('value').then((snapshot) => {
+            db.ref('odevData_2026/parentConnections').once('value').then((snapshot) => {
                 let connections = snapshot.val() || [];
                 let exists = connections.find(c => c.className === cls && c.studentName === stu && c.parentName === pName);
                 if (!exists) {
                     connections.push({className: cls, studentName: stu, parentName: pName, date: new Date().toLocaleDateString('tr-TR')});
-                    db.ref('odevData/parentConnections').set(connections);
+                    db.ref('odevData_2026/parentConnections').set(connections);
                 }
                 setTimeout(function() { 
                     document.getElementById('loadingOverlay').style.display = 'none';

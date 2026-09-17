@@ -96,8 +96,8 @@
         .live-indicator { display: inline-block; width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        .logout-btn { position: relative; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 12px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; outline: none; }
-        .logout-btn:active { background: rgba(255,255,255,0.25); }
+        .logout-btn { position: relative; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 12px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; outline: none; transition: all 0.2s;}
+        .logout-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.95);}
 
         .container { padding: 16px; }
         
@@ -112,7 +112,7 @@
         select { background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23EBEBF5%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 12px auto; }
         option { background-color: #1C1C1E; color: #FFFFFF; font-size: 16px; }
         
-        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);}
+        .btn-vista { width: 100%; padding: 16px; border: none; border-radius: 14px; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--on-primary); background-color: var(--primary); display: flex; justify-content: center; gap: 8px; outline: none; box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4); transition: all 0.2s ease;}
         
         .dashboard-grid-modern { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
         .stat-card-modern { padding: 20px; border-radius: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; border: none; box-shadow: 0 8px 16px rgba(0,0,0,0.15); transition: transform 0.1s; }
@@ -152,7 +152,7 @@
             <span class="app-title-modern">Veli Bilgilendirme Sistemi</span>
             <span id="syncStatus"></span>
         </div>
-        <button id="logoutBtn" class="logout-btn" onclick="logoutParent()" style="display:none;">
+        <button id="logoutBtn" class="logout-btn" onclick="logoutParent(this)" style="display:none;">
             <span style="font-size: 14px;">🔄</span> Yeniden Bağlan
         </button>
     </div>
@@ -188,7 +188,7 @@
                     <label>Veli Adı ve Soyadı</label>
                     <input type="text" id="parentNameInput" placeholder="Örn: Murat Yılmaz">
                 </div>
-                <button class="btn-vista" onclick="saveParentSetup()" style="margin-top:24px;"><span style="font-size:18px;">🔗</span> Kaydet ve Bağlan</button>
+                <button class="btn-vista" onclick="saveParentSetup(this)" style="margin-top:24px;"><span style="font-size:18px;">🔗</span> Kaydet ve Bağlan</button>
             </div>
         </div>
 
@@ -198,6 +198,26 @@
     </div>
 
 <script>
+    // ORTAK BUTON ANİMASYON FONKSİYONU
+    function showBtnMessage(btn, msg, type = 'error') {
+        if(!btn) return;
+        if(btn.dataset.animating === "true") return;
+        btn.dataset.animating = "true";
+        
+        const origHTML = btn.innerHTML;
+        const origBg = btn.style.background;
+        
+        btn.innerHTML = msg;
+        btn.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
+        btn.style.color = '#fff';
+        
+        setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.style.background = origBg;
+            btn.dataset.animating = "false";
+        }, 2000);
+    }
+
     const classData = {
         "5E": [
             "278 - MURAT YILDIZ", "327 - NUH İŞLER", "505 - DENİZ YILMAZ", "604 - AHMET ASAF GÜNDÜZ", "613 - ASENA LEKESİZ", 
@@ -308,10 +328,23 @@
         }
     }
 
-    function logoutParent() {
-        if(confirm("Bağlantıyı kesmek ve bilgilerinizi yeniden girmek istiyor musunuz?")) {
+    function logoutParent(btn) {
+        if(btn.dataset.confirming === "true") {
             localStorage.removeItem('parentStudent');
             location.reload();
+        } else {
+            btn.dataset.originalHtml = btn.innerHTML;
+            btn.dataset.confirming = "true";
+            btn.innerHTML = "❓ Emin misiniz?";
+            btn.style.background = 'var(--warning)';
+            btn.style.color = '#fff';
+            setTimeout(() => {
+                if(btn.dataset.confirming === "true") {
+                    btn.dataset.confirming = "false";
+                    btn.innerHTML = btn.dataset.originalHtml;
+                    btn.style.background = '';
+                }
+            }, 3000);
         }
     }
 
@@ -335,15 +368,19 @@
         }
     }
     
-    function saveParentSetup() {
+    function saveParentSetup(btn) {
         const cls = document.getElementById('parentSetupClass').value; 
         const stu = document.getElementById('parentSetupStudent').value;
         const pName = document.getElementById('parentNameInput').value.trim();
 
-        if(!cls || !stu) return alert("Lütfen sınıf ve öğrenci seçin!");
-        if(!pName) return alert("Lütfen veli adını ve soyadını girin!");
+        if(!cls || !stu) return showBtnMessage(btn, "⚠️ Sınıf/Öğrenci Seçin");
+        if(!pName) return showBtnMessage(btn, "⚠️ Veli Adı Girin");
 
-        if(confirm("Cihaz " + cls + " sınıfından seçtiğiniz öğrencinin verilerini okumak için kilitlenecektir. Onaylıyor musunuz?")) {
+        if (btn.dataset.confirming === "true") {
+            btn.dataset.confirming = "false";
+            btn.innerHTML = `<span style="font-size:18px;">🔗</span> Kaydet ve Bağlan`;
+            btn.style.background = '';
+            
             document.getElementById('loadingOverlay').style.display = 'flex';
             
             db.ref('odevData_2026/parentConnections').once('value').then((snapshot) => {
@@ -359,9 +396,21 @@
                     checkParentStatus();
                 }, 1500);
             }).catch(err => {
-                alert("Bağlantı hatası! Lütfen internetinizi kontrol edin.");
+                showBtnMessage(btn, "❌ Bağlantı Hatası");
                 document.getElementById('loadingOverlay').style.display = 'none';
             });
+        } else {
+            btn.dataset.originalHtml = btn.innerHTML;
+            btn.dataset.confirming = "true";
+            btn.innerHTML = "❓ Emin misiniz?";
+            btn.style.background = 'var(--warning)';
+            setTimeout(() => {
+                if(btn.dataset.confirming === "true") {
+                    btn.dataset.confirming = "false";
+                    btn.innerHTML = btn.dataset.originalHtml;
+                    btn.style.background = '';
+                }
+            }, 3000);
         }
     }
 
@@ -520,37 +569,4 @@
                 chartHtml += `<div style="width:100%; text-align:center; color:var(--text-muted); font-size:13px; align-self:center;">Henüz veri yok.</div>`;
             } else {
                 studentHistory.forEach(h => {
-                    let hColor = h.isAbsent ? 'var(--warning)' : (h.isDone ? 'var(--success)' : 'var(--danger)');
-                    let hHeight = h.isAbsent ? '50%' : (h.isDone ? '100%' : '15%');
-                    let icon = h.isAbsent ? '➖' : (h.isDone ? '✅' : '❌');
-                    chartHtml += `<div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-                        <div style="font-size:14px; margin-bottom:4px;">${icon}</div>
-                        <div style="width:100%; max-width:35px; height:${hHeight}; background:${hColor}; border-radius:6px 6px 0 0; opacity:0.85; box-shadow:0 0 10px ${hColor}; transition: height 1s ease;"></div>
-                    </div>`;
-                });
-            }
-            chartHtml += `</div>
-                <div style="display:flex; justify-content:space-around; margin-top:8px;">`;
-            studentHistory.forEach(h => {
-                chartHtml += `<div style="font-size:9px; color:rgba(255,255,255,0.6);">${h.date.substring(0,5)}</div>`;
-            });
-            chartHtml += `</div></div>`;
-
-            container.innerHTML = `${annHtml}
-            <div style="text-align:center; margin-bottom:30px; padding-top:10px;">
-                <div style="font-size:64px; margin-bottom:10px; filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.3));">👤</div>
-                <h2 style="margin:0; color:var(--text-main); font-size:28px; letter-spacing:-0.5px;">${cleanName}</h2>
-                <p style="color:rgba(255,255,255,0.7); margin:6px 0 0 0; font-size:15px; font-weight:500;">${className} Sınıfı Raporu</p>
-                ${streakIcon}
-            </div>
-            ${statsHtml}
-            ${chartHtml}
-            ${matWarning}
-            ${pendingSection}
-            <div class='glass-header'>✅ Kontrol Geçmişi</div>
-            <div class="history-list-modern">${html}</div>`;
-        }
-    }
-</script>
-</body>
-</html>
+                    let hColor = h.isAbsent ? 'var(--warning)' : (h.isD

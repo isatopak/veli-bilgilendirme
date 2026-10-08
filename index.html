@@ -173,11 +173,11 @@
                     <label>Sınıf Seçiniz</label>
                     <select id="parentSetupClass" onchange="loadParentSetupStudents()">
                         <option value="" disabled selected>Lütfen Seçin...</option>
-                        <option value="5E">5E</option>
-                        <option value="6B">6B</option>
+                        <option value="5 SEÇMELİ">5 SEÇMELİ</option>
+                        <option value="6 SEÇMELİ">6 SEÇMELİ</option>
                         <option value="7A">7A</option>
-                        <option value="5YDA">5YDA</option>
-                        <option value="6YDA">6YDA</option>
+                        <option value="5E">5E</option>
+                        <option value="7SEÇMELİ">7SEÇMELİ</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -219,40 +219,50 @@
     }
 
     const classData = {
-        "5E": [
-            "278 - MURAT YILDIZ", "327 - NUH İŞLER", "505 - DENİZ YILMAZ", "604 - AHMET ASAF GÜNDÜZ", "613 - ASENA LEKESİZ", 
-            "623 - BELİNAY KAYA", "627 - BERAT ÖZTÜRK", "631 - BEYZA NUR İNALKAÇ", "640 - DILGEŞ MED GÜCİN", "649 - ELİF MİRA SOLAK", 
-            "658 - EREN BEKTAŞ", "662 - ERVA TUNCAY", "664 - ESİLA ÖZCAN", "669 - EYLÜL ÖZDEMİR", "674 - EYMEN ÖZTÜRK", 
-            "676 - FATMA ZEHRA YURDİGÜL", "694 - İBRAHİM MUSTAFA KAYA", "696 - İDİL YILDIRIM", "700 - ATLAS TOPCU", "712 - MELEK İNALKAÇ", 
-            "716 - MİRAÇ BERK ÖZTÜRK", "717 - MİRAÇ ÖZBEK", "729 - MUSTAFA ERAY HAYLA", "736 - NİYAZİ KERİM ALTUNYUVA", "744 - ÖMER MERT TARANDIR", 
-            "761 - UMUT AYAZ ADAK", "765 - YAĞIZ KAAN BAYHAN", "766 - YAĞMUR BERİL ALPER", "784 - DERİN DOĞAN"
-        ],
-        "6B": [
-            "103 - BEKİRHAN VEZİROĞLU", "119 - BERFİN OCAK", "138 - ECE NUR MACİT", "195 - EYMEN AKYOL", "216 - HÜSEYİN METİN ÜNLÜ", 
-            "228 - MEHMET ALİ ACAR", "229 - MEHMET BORAN ŞENGÜL", "253 - UĞUR ERMİŞ", "282 - MÜNÜR ELDEMİR", "292 - ÖMER TOPRAK KURUBAL", 
-            "311 - ZEYNEP SENA İLÇİN", "343 - DORUK ATEŞ", "351 - FEYZA KURUÇAY", "363 - HÜSEYİN KAYRA DEMİR", "366 - ÇINAR GÜLSEREN", 
-            "367 - ELİF SARE KORKUT", "415 - ASYA GÖKMEN", "420 - BEGÜM GÜLDİKEN", "428 - BUĞRA ÇINAR", "430 - BÜŞRANUR KAPUCU", 
-            "452 - EMİR TALHA ZENGİN", "475 - MELİNAY PERÇİN", "485 - MUHAMMET YUNUS ÜNAL", "496 - RAMAZAN KAĞAN KAYA", "510 - ERŞAN ALİ YÜCEL", 
-            "511 - MELİSA NUR KUTLU", "512 - EFE CAN SUKAN", "542 - ERVA ÖZTÜRK"
-        ],
-        "7A": [
-            "2 - AHMET AYAZ ALTINTAŞ", "4 - AHMET DERE", "5 - ANIL ERGİN AKSOY", "11 - AYAZ NERGİZ", "14 - CAN KARAKAYA", 
-            "17 - ÇINAR YÜCE", "30 - DERİN EREN", "35 - DİLARA AYDIN", "48 - ELA NUR ÖZBEK", "62 - EZGİ ÖZENSES", 
-            "63 - NAS MAYA KURUBAL", "70 - RÜZGAR CAN", "73 - SALİHA UYSAL", "84 - SELEN ÖZDEMİR", "91 - UMUT BOZKURT", 
-            "93 - YİĞİT ER", "94 - YUSUF HAMZA ÖZBEK", "96 - ZEYNEP BALTA", "102 - ZEYNEP KALENDER", "107 - EKİN FIRAT KOÇ", 
-            "109 - SERİN ÜZEL", "125 - RÜZGAR İNAN ŞIK", "126 - NİSA YAĞMUR ÜLKER", "127 - ESLEM NİSA ALTINDAŞ", "140 - ATA CAN ÖZDEMİR", 
-            "147 - SARE KARABULUT", "238 - ELİF BAHAR CEYLAN", "370 - SOLİN DENİZ KOÇİN", "389 - YUSUF URAS KILIÇ"
-        ],
-        "5YDA": [
-            "701 - DURU KURUBAL", "706 - YUSUF AKTÜRK", "795 - ELİF BELİNAY KARAGÖZ", "337 - ELİF CEYLİN SARI", "702 - GÖKÇE MERYEM KÖSE", 
-            "704 - ÖMER ASAF ÖZTÜRK", "703 - KUMSAL ERDÖNMEZ", "699 - ADASU ÇAKIR", "705 - ÖMER GEDİK", "708 - ERVA GÜRGÖL", 
-            "700 - ATLAS TOPCU", "658 - EREN BEKTAŞ", "745 - ÖZGÜR DENİZ KALKAN", "618 - AYDIN TUĞRA ÇİFTÇİ", "614 - ASRIN ATAKAN DEMİR", 
+        "5 SEÇMELİ": [
+            "701 - DURU KURUBAL", "706 - YUSUF AKTÜRK", "795 - ELİF BELİNAY KARAGÖZ", 
+            "337 - ELİF CEYLİN SARI", "702 - GÖKÇE MERYEM KÖSE", "704 - ÖMER ASAF ÖZTÜRK", 
+            "703 - KUMSAL ERDÖNMEZ", "699 - ADASU ÇAKIR", "705 - ÖMER GEDİK", 
+            "708 - ERVA GÜRGÖL", "700 - ATLAS TOPCU", "658 - EREN BEKTAŞ", 
+            "745 - ÖZGÜR DENİZ KALKAN", "618 - AYDIN TUĞRA ÇİFTÇİ", "614 - ASRIN ATAKAN DEMİR", 
             "777 - ZEYNEP ÖZBEK", "649 - ELİF MİRA SOLAK", "603 - AFFAN ŞAKİR SÖNMEZ"
         ],
-        "6YDA": [
-            "209 - SEVGİ ŞENER", "292 - ÖMER TOPRAK KURUBAL", "363 - HÜSEYİN KAYRA DEMİR", "428 - BUĞRA ÇINAR", "440 - EGE ÖZEL", 
-            "59 - AHSEN ECE ÖZBEK", "75 - ALMİRA AYDIN", "202 - HİLAL ERVA KURUBAL", "410 - ZEHRA KARABULUT", "433 - DERİN SOMER", 
-            "414 - ASRIN KURŞUN"
+        "6 SEÇMELİ": [
+            "209 - SEVGİ ŞENER", "292 - ÖMER TOPRAK KURUBAL", "363 - HÜSEYİN KAYRA DEMİR", 
+            "428 - BUĞRA ÇINAR", "440 - EGE ÖZEL", "59 - AHSEN ECE ÖZBEK", 
+            "75 - ALMİRA AYDIN", "202 - HİLAL ERVA KURUBAL", "410 - ZEHRA KARABULUT", 
+            "433 - DERİN SOMER", "414 - ASRIN KURŞUN"
+        ],
+        "7A": [
+            "2 - AHMET AYAZ ALTINTAŞ", "4 - AHMET DERE", "5 - ANIL ERGİN AKSOY", 
+            "11 - AYAZ NERGİZ", "14 - CAN KARAKAYA", "17 - ÇINAR YÜCE", 
+            "30 - DERİN EREN", "35 - DİLARA AYDIN", "48 - ELA NUR ÖZBEK", 
+            "62 - EZGİ ÖZENSES", "63 - NAS MAYA KURUBAL", "70 - RÜZGAR CAN", 
+            "73 - SALİHA UYSAL", "84 - SELEN ÖZDEMİR", "91 - UMUT BOZKURT", 
+            "93 - YİĞİT ER", "94 - YUSUF HAMZA ÖZBEK", "96 - ZEYNEP BALTA", 
+            "102 - ZEYNEP KALENDER", "107 - EKİN FIRAT KOÇ", "109 - SERİN ÜZEL", 
+            "125 - RÜZGAR İNAN ŞIK", "126 - NİSA YAĞMUR ÜLKER", "127 - ESLEM NİSA ALTINDAŞ", 
+            "140 - ATA CAN ÖZDEMİR", "147 - SARE KARABULUT", "238 - ELİF BAHAR CEYLAN",
+            "370 - SOLİN DENİZ KOÇİN", "389 - YUSUF URAS KILIÇ"
+        ],
+        "5E": [
+            "278 - MURAT YILDIZ", "505 - DENİZ YILMAZ", "604 - AHMET ASAF GÜNDÜZ", "613 - ASENA LEKESİZ", 
+            "623 - BELİNAY KAYA", "627 - BERAT ÖZTÜRK", "631 - BEYZA NUR İNALKAÇ", "640 - DİLGEŞ MED GÜCİN", 
+            "649 - ELİF MİRA SOLAK", "658 - EREN BEKTAŞ", "662 - ERVA TUNCAY", "664 - ESİLA ÖZCAN", 
+            "674 - EYMEN ÖZTÜRK", "696 - İDİL YILDIRIM", "700 - ATLAS TOPCU", "716 - MİRAÇ BERK ÖZTÜRK", 
+            "717 - MİRAÇ ÖZBEK", "729 - MUSTAFA ERAY HAYLA", "736 - NİYAZİ KERİM ALTUNYUVA", 
+            "744 - ÖMER MERT TARANDIR", "761 - UMUT AYAZ ADAK", "765 - YAĞIZ KAAN BAYHAN", 
+            "766 - YAĞMUR BERİL ALPER", "784 - DERİN DOĞAN", "596 - ELİF CEYLİN SARI"
+        ],
+        "7SEÇMELİ": [
+            "2 - AHMET AYAZ ALTINTAŞ", "4 - AHMET DERE", "5 - ANIL ERGİN AKSOY", 
+            "11 - AYAZ NERGİZ", "14 - CAN KARAKAYA", "17 - ÇINAR YÜCE", 
+            "48 - ELA NUR ÖZBEK", "62 - EZGİ ÖZENSES", "63 - NAS MAYA KURUBAL", 
+            "70 - RÜZGAR CAN", "73 - SALİHA UYSAL", "84 - SELEN ÖZDEMİR", 
+            "91 - UMUT BOZKURT", "96 - ZEYNEP BALTA", "102 - ZEYNEP KALENDER", 
+            "107 - EKİN FIRAT KOÇ", "125 - RÜZGAR İNAN ŞIK", "126 - NİSA YAĞMUR ÜLKER", 
+            "127 - ESLEM NİSA ALTINDAŞ", "140 - ATA CAN ÖZDEMİR", "147 - SARE KARABULUT", 
+            "238 - ELİF BAHAR CEYLAN", "370 - SOLİN DENİZ KOÇİN"
         ]
     };
 
